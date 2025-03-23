@@ -1,0 +1,11 @@
+server/manager-service/node_modules
+server/manager-service/.env
+client/node_modules
+client/.env
+*.env
+notes.txt
+.env
+server/student-service/node_modules
+server/student-service/.env
+server/student-service/scripts
+server/manager-service/scripts
