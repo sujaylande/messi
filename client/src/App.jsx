@@ -8,22 +8,29 @@ import StudentPublic from "./pages/StudentPublic"
 import Menu from "./pages/Menu"
 import FeedbackInsights from "./pages/Feedback"
 import NoticeBoard from "./components/NoticeBoard"
+import ManagerLogin from "./pages/ManagerLogin"
+import ManagerProtectWrapper from './pages/ManagerProtectWrapper'
+import StudentProtectWrapper from './pages/StudentProtectWrapper'
+import StudentLogin from "./pages/StudentLogin"
+
+
 
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/mess-stat" element={<MessStatistics/>} />
-        <Route path="/student-stat" element={<StudentMessAttendance/>} />
-        <Route path="/scan" element={<Scan/>} />
-        <Route path="/register" element={<Register/>} />
-        <Route path="/student-public" element={<StudentPublic/>} />
-        <Route path="/menu" element={<Menu/>} />
-        <Route path="/feedback" element={<FeedbackInsights/>} />
-        <Route path="/notice-board" element={<NoticeBoard/>} />
-
+        <Route path="/" element={<ManagerProtectWrapper><HomePage /></ManagerProtectWrapper>} />
+        <Route path="/mess-stat" element={<ManagerProtectWrapper><MessStatistics/></ManagerProtectWrapper>} />
+        <Route path="/student-stat" element={<ManagerProtectWrapper><StudentMessAttendance/></ManagerProtectWrapper>} />
+        <Route path="/scan" element={<ManagerProtectWrapper><Scan/></ManagerProtectWrapper>} />
+        <Route path="/register" element={<ManagerProtectWrapper><Register/></ManagerProtectWrapper>} />
+        <Route path="/student-public" element={<StudentProtectWrapper><StudentPublic/></StudentProtectWrapper>} />
+        <Route path="/menu" element={<ManagerProtectWrapper><Menu/></ManagerProtectWrapper>} />
+        <Route path="/feedback" element={<ManagerProtectWrapper><FeedbackInsights/></ManagerProtectWrapper>} />
+        <Route path="/notice-board" element={<ManagerProtectWrapper><NoticeBoard/></ManagerProtectWrapper>} />
+        <Route path="/manager/login" element={<ManagerLogin/>} />
+        <Route path="/student/login" element={<StudentLogin/>} />
         <Route path="*" element={<h1>Not Found</h1>} />
       </Routes>
     </Router>

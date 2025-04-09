@@ -10,13 +10,21 @@ export default function NoticeBoard() {
   }, []);
 
   const fetchNotices = async () => {
-    const res = await axios.get("http://localhost:5000/api/manager/display-notices");
+    const res = await axios.get("http://localhost:5000/api/manager/display-notices",   {
+      headers: {
+          Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
+      },
+  });
     setNotices(res.data);
   };
 
   const addNotice = async () => {
     if (!notice.trim()) return;
-    await axios.post("http://localhost:5000/api/manager/add-notice", { notice });
+    await axios.post("http://localhost:5000/api/manager/add-notice", { notice }, {
+      headers: {
+          Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
+      },
+  });
     setNotice("");
     fetchNotices();
   };

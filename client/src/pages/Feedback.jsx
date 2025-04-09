@@ -15,8 +15,16 @@ export default function FeedbackInsights() {
       try {
         setLoading(true)
         const [statsResponse, commentsResponse] = await Promise.all([
-          axios.get("http://localhost:5000/api/manager/feedback-stats"),
-          axios.get("http://localhost:5000/api/manager/negative-feedback"),
+          axios.get("http://localhost:5000/api/manager/feedback-stats",   {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
+            },
+        }),
+          axios.get("http://localhost:5000/api/manager/negative-feedback",   {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
+            },
+        }),
         ])
 
         // Data validation and transformation
@@ -347,7 +355,7 @@ export default function FeedbackInsights() {
       {/* Negative Comments Section */}
       <div className="mt-8">
         <div className="flex items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-800">Top Negative Comments (Last 7 Days)</h2>
+          <h2 className="text-xl font-bold text-gray-800">Top Negative Comments From Todays Feedback Form</h2>
           <span className="ml-3 bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
             {negativeComments.length}
           </span>

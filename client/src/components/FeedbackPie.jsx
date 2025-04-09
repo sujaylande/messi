@@ -8,7 +8,11 @@ export default function FeedbackPie() {
     const [feedbackData, setFeedbackData] = useState([]);
 
     useEffect(() => {
-        axios.get("http://localhost:5000/api/manager/feedback-stats")
+        axios.get("http://localhost:5000/api/manager/feedback-stats",   {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
+            },
+        })
             .then(response => {
                 setFeedbackData(response.data);
             })

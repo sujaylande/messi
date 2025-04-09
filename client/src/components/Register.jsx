@@ -5,13 +5,17 @@ function Register() {
   const [email, setEmail] = useState('');
   const [reg_no, setRegNo] = useState('');
   const [roll_no, setRollNo] = useState('');
+  const [password, setPassword] = useState('');
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const response = await fetch('http://localhost:5000/api/manager/register', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, reg_no, roll_no })
+      headers: { 'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
+       },
+      body: JSON.stringify({ name, email, reg_no, roll_no, password })
     });
     const data = await response.json();
 
@@ -27,6 +31,7 @@ function Register() {
     setEmail('');
     setRegNo('');
     setRollNo('');
+    setPassword('');
   };
 
   return (
@@ -35,8 +40,9 @@ function Register() {
       <form onSubmit={handleSubmit} className='w-full max-w-md space-y-4'>
         <input className='w-full p-2 border rounded-lg' type='text' placeholder='Name' value={name} onChange={e => setName(e.target.value)} required />
         <input className='w-full p-2 border rounded-lg' type='email' placeholder='Email' value={email} onChange={e => setEmail(e.target.value)} required />
-        <input className='w-full p-2 border rounded-lg' type='text' placeholder='reg_no' value={reg_no} onChange={e => setRegNo(e.target.value)} required />
+        <input className='w-full p-2 border rounded-lg' type='text' placeholder='Mess reg_no' value={reg_no} onChange={e => setRegNo(e.target.value)} required />
         <input className='w-full p-2 border rounded-lg' type='text' placeholder='roll_no' value={roll_no} onChange={e => setRollNo(e.target.value)} required />
+        <input className='w-full p-2 border rounded-lg' type='text' placeholder='password' value={password} onChange={e => setPassword(e.target.value)} required />
         <button className='w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600' type='submit'>Register</button>
       </form>
     </div>

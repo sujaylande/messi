@@ -5,7 +5,11 @@ export default function FeedbackInsights() {
     const [negativeComments, setNegativeComments] = useState([]);
 
     useEffect(() => {
-        axios.get("http://localhost:5000/api/manager/negative-feedback")
+        axios.get("http://localhost:5000/api/manager/negative-feedback",   {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
+            },
+        })
             .then(response => {
                 setNegativeComments(response.data);
             })
@@ -16,7 +20,7 @@ export default function FeedbackInsights() {
 
     return (
         <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Top Negative Comments (Last 7 Days)</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Top Negative Comments from today's feedback form</h2>
             <ul className="space-y-4">
                 {negativeComments.length > 0 ? (
                     negativeComments.map((comment, index) => (

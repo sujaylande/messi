@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
+import axios from "axios";
+
 import {
   ChevronDown,
   ChevronUp,
@@ -74,47 +76,87 @@ const MessStatistics = () => {
 
   const fetchStudents = (status) => {
     setIsLoading(true)
-    fetch(`http://localhost:5000/api/manager/students-status-list?status=${status}`)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Network response was not ok")
-        }
-        return res.json()
+  
+    axios
+      .get(`http://localhost:5000/api/manager/students-status-list?status=${status}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("manager-token")}`,        },
       })
-      .then((data) => {
-        setStudents(data)
+      .then((res) => {
+        setStudents(res.data)
         setIsLoading(false)
       })
       .catch((err) => {
-        console.error("Error fetching data:", err)
-        setError("Failed to load student data. Please try again.")
+        console.error('Error fetching data:', err)
+        setError('Failed to load student data. Please try again.')
         setIsLoading(false)
       })
   }
-
+  
   useEffect(() => {
     setIsLoading(true)
-
-    // Fetch mess statistics
-    fetch("http://localhost:5000/api/manager/mess-stat")
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Network response was not ok")
-        }
-        return res.json()
+  
+    axios
+      .get('http://localhost:5000/api/manager/mess-stat', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("manager-token")}`,        },
       })
-      .then((data) => {
-        setData(data)
+      .then((res) => {
+        setData(res.data)
         setIsLoading(false)
       })
       .catch((err) => {
-        console.error("Error fetching data:", err)
-        setError("Failed to load mess statistics. Please try again.")
+        console.error('Error fetching data:', err)
+        setError('Failed to load mess statistics. Please try again.')
         setIsLoading(false)
       })
-
+  
     fetchStudents(filter)
   }, [filter])
+
+  // const fetchStudents = (status) => {
+  //   setIsLoading(true)
+  //   fetch(`http://localhost:5000/api/manager/students-status-list?status=${status}`)
+  //     .then((res) => {
+  //       if (!res.ok) {
+  //         throw new Error("Network response was not ok")
+  //       }
+  //       return res.json()
+  //     })
+  //     .then((data) => {
+  //       setStudents(data)
+  //       setIsLoading(false)
+  //     })
+  //     .catch((err) => {
+  //       console.error("Error fetching data:", err)
+  //       setError("Failed to load student data. Please try again.")
+  //       setIsLoading(false)
+  //     })
+  // }
+
+  // useEffect(() => {
+  //   setIsLoading(true)
+
+  //   // Fetch mess statistics
+  //   fetch("http://localhost:5000/api/manager/mess-stat")
+  //     .then((res) => {
+  //       if (!res.ok) {
+  //         throw new Error("Network response was not ok")
+  //       }
+  //       return res.json()
+  //     })
+  //     .then((data) => {
+  //       setData(data)
+  //       setIsLoading(false)
+  //     })
+  //     .catch((err) => {
+  //       console.error("Error fetching data:", err)
+  //       setError("Failed to load mess statistics. Please try again.")
+  //       setIsLoading(false)
+  //     })
+
+  //   fetchStudents(filter)
+  // }, [filter])
 
   // Calculate meal trends (increase/decrease from previous day)
   const calculateTrend = (index, mealType) => {
@@ -208,7 +250,7 @@ const MessStatistics = () => {
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-1">
               <Link
-                to="/dashboard"
+                to="/"
                 className="flex items-center text-gray-700 hover:bg-blue-50 hover:text-blue-700 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 <Home className="mr-1 h-4 w-4" />
@@ -236,11 +278,11 @@ const MessStatistics = () => {
                 Notice Board
               </Link>
               <Link
-                to="/statistics"
+                to="/student-stat"
                 className="flex items-center text-blue-700 bg-blue-50 px-3 py-2 rounded-md text-sm font-medium"
               >
                 <Users className="mr-1 h-4 w-4" />
-                Statistics
+                Student Statistics
               </Link>
             </div>
 
@@ -261,7 +303,7 @@ const MessStatistics = () => {
           <div className="md:hidden bg-white shadow-lg">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               <Link
-                to="/dashboard"
+                to="/"
                 className="flex items-center text-gray-700 hover:bg-blue-50 hover:text-blue-700 block px-3 py-2 rounded-md text-base font-medium"
               >
                 <Home className="mr-2 h-5 w-5" />
@@ -289,11 +331,11 @@ const MessStatistics = () => {
                 Notice Board
               </Link>
               <Link
-                to="/statistics"
+                to="/student-stat"
                 className="flex items-center text-blue-700 bg-blue-50 block px-3 py-2 rounded-md text-base font-medium"
               >
                 <Users className="mr-2 h-5 w-5" />
-                Statistics
+                Student Statistics
               </Link>
             </div>
           </div>

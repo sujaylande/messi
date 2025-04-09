@@ -1,45 +1,51 @@
 const express = require('express');
 const upload = require("../utils/multer.js");
 const managerController = require('../controllers/manager.js');
+const { authManager } = require("../middlewares/auth.js");
 
 const router = express.Router();
 
 
-router.post('/register', managerController.register)
+router.post('/login', managerController.managerLogin);
 
-router.get('/scan', managerController.scan)
+router.post('/register', authManager, managerController.register)
 
-router.get('/mess-stat', managerController.messStatistics)
+router.get('/scan', authManager, managerController.scan)
 
-router.get('/student-stat/:reg_no', managerController.studentStatistics)
+router.get('/mess-stat', authManager, managerController.messStatistics)
 
-router.get('/active-student', managerController.activeStudents)
+router.get('/student-stat/:reg_no', authManager, managerController.studentStatistics)
 
-router.get('/todays-attendance', managerController.todaysAttendance)
+router.get('/active-student', authManager, managerController.activeStudents)
 
-router.get('/attendance-probability', managerController.attendanceProbability)
+router.get('/todays-attendance', authManager, managerController.todaysAttendance)
 
-router.post('/student-status', managerController.updateStudentStatus)
+router.get('/attendance-probability', authManager, managerController.attendanceProbability)
 
-router.get('/students-status-list', managerController.studentStatusList)
+router.post('/student-status', authManager, managerController.updateStudentStatus)
 
-router.delete('/remove-student/:reg_no', managerController.removeStudent)
+router.get('/students-status-list', authManager, managerController.studentStatusList)
 
-router.post('/add-notice', managerController.addNotice)
+router.delete('/remove-student/:reg_no', authManager, managerController.removeStudent)
 
-router.get('/display-notices', managerController.displayNotice)
+router.post('/add-notice', authManager, managerController.addNotice)
 
-router.delete('/remove-notice/:id', managerController.removeNotice)
+router.get('/display-notices', authManager, managerController.displayNotice)
 
-router.post('/add-menu', upload.single('image'), managerController.addMenu)
+router.delete('/remove-notice/:id', authManager, managerController.removeNotice)
 
-router.get('/display-menu', managerController.displayMenu)
+router.post('/add-menu', authManager, upload.single('image'), managerController.addMenu)
 
-router.post('/feedback-form', managerController.feedbackForm)
+router.get('/display-menu', authManager, managerController.displayMenu)
 
-router.get('/negative-feedback', managerController.displayNegativeFeedbacks)
+router.post('/feedback-form', authManager, managerController.feedbackForm)
 
-router.get('/feedback-stats', managerController.feedbackStatistics)
+router.get('/negative-feedback', authManager, managerController.displayNegativeFeedbacks)
+
+router.get('/feedback-stats', authManager, managerController.feedbackStatistics)
+
+router.get('/profile', authManager, managerController.getManagerProfile)
+
 
 
 

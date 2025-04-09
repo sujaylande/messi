@@ -11,7 +11,6 @@ const StudentMessAttendance = () => {
   const [actionRegNo, setActionRegNo] = useState("");
   const [removeRegNo, setRemoveRegNo] = useState("");
 
-
   const fetchAttendance = async () => {
     if (!regNo) {
       setError("Please enter a valid registration number.");
@@ -21,7 +20,14 @@ const StudentMessAttendance = () => {
     setError("");
 
     try {
-      const response = await axios.get(`http://localhost:5000/api/manager/student-stat/${regNo}`);
+      const response = await axios.get(
+        `http://localhost:5000/api/manager/student-stat/${regNo}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
+          },
+        }
+      );
       setAttendanceData(response.data.attendance);
       setTotalAmount(response.data.totalAmount);
       setStudentDetails(response.data.studentDetails);
@@ -42,10 +48,19 @@ const StudentMessAttendance = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/api/manager/student-status", {
-        reg_no: actionRegNo,
-        status: status,
-      });
+      const response = await axios.post(
+        "http://localhost:5000/api/manager/student-status",
+        {
+          reg_no: actionRegNo,
+          status: status,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
+          },
+        }
+      );
+
       if (response.data.message) {
         alert(response.data.message);
       } else if (response.data.error) {
@@ -66,7 +81,15 @@ const StudentMessAttendance = () => {
     }
 
     try {
-      const response = await axios.delete(`http://localhost:5000/api/manager/remove-student/${removeRegNo}`);
+      const response = await axios.delete(
+        `http://localhost:5000/api/manager/remove-student/${removeRegNo}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
+          },
+         
+        }
+      );
       if (response.status === 404) {
         alert("Student not found");
       } else if (response.status === 200) {
@@ -78,9 +101,7 @@ const StudentMessAttendance = () => {
       alert(err.response?.data?.error || "Unknown error");
       setRemoveRegNo("");
     }
-    
-  }
-
+  };
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
@@ -127,12 +148,13 @@ const StudentMessAttendance = () => {
           >
             Remove Student
           </button>
-          
         </div>
       </div>
 
       <div className="bg-white shadow-md rounded p-4 mt-4">
-      <h3 className="text-lg font-bold mb-2">Get student details and attendance</h3>
+        <h3 className="text-lg font-bold mb-2">
+          Get student details and attendance
+        </h3>
         <div className="flex gap-2">
           <input
             type="text"
@@ -156,11 +178,21 @@ const StudentMessAttendance = () => {
       {studentDetails && (
         <div className="bg-white shadow-md rounded p-4 mb-4">
           <h3 className="text-lg font-bold mb-2">Student Details</h3>
-          <p><strong>Name:</strong> {studentDetails.name}</p>
-          <p><strong>Reg No:</strong> {studentDetails.reg_no}</p>
-          <p><strong>Email:</strong> {studentDetails.email}</p>
-          <p><strong>Registered_on:</strong> {studentDetails.registered_on}</p>
-          <p><strong>Status:</strong> {studentDetails.status}</p>
+          <p>
+            <strong>Name:</strong> {studentDetails.name}
+          </p>
+          <p>
+            <strong>Reg No:</strong> {studentDetails.reg_no}
+          </p>
+          <p>
+            <strong>Email:</strong> {studentDetails.email}
+          </p>
+          <p>
+            <strong>Registered_on:</strong> {studentDetails.registered_on}
+          </p>
+          <p>
+            <strong>Status:</strong> {studentDetails.status}
+          </p>
         </div>
       )}
 
@@ -196,7 +228,6 @@ const StudentMessAttendance = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };

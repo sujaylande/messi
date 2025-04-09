@@ -14,7 +14,11 @@ const HomePage = () => {
 
   const fetchStudentStats = async () => {
     try {
-      const { data } = await axios.get("http://localhost:5000/api/manager/active-student")
+      const { data } = await axios.get("http://localhost:5000/api/manager/active-student",   {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
+        },
+    })
       setStudentStats(data)
     } catch (error) {
       console.error("Error fetching student stats:", error)
@@ -23,7 +27,11 @@ const HomePage = () => {
 
   const fetchAttendanceToday = async () => {
     try {
-      const { data } = await axios.get("http://localhost:5000/api/manager/todays-attendance")
+      const { data } = await axios.get("http://localhost:5000/api/manager/todays-attendance",   {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
+        },
+    })
       setAttendanceToday(data)
     } catch (error) {
       console.error("Error fetching today's attendance:", error)
@@ -32,7 +40,11 @@ const HomePage = () => {
 
   const fetchForecast = async () => {
     try {
-      const { data } = await axios.get("http://localhost:5000/api/manager/attendance-probability")
+      const { data } = await axios.get("http://localhost:5000/api/manager/attendance-probability",   {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
+        },
+    })
       setForecast(data)
     } catch (error) {
       console.error("Error fetching forecast:", error)

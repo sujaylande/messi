@@ -21,7 +21,9 @@ export function MenuForm({ fetchMenu }) {
 
     try {
       const response = await axios.post("http://localhost:5000/api/manager/add-menu", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: { "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${localStorage.getItem("manager-token")}`
+         },
       });
 
       if (response.data.message) {

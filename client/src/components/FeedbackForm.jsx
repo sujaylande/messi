@@ -12,6 +12,8 @@ const FeedbackForm = () => {
         comments: "",
     });
 
+
+
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData({
@@ -23,7 +25,11 @@ const FeedbackForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post("http://localhost:5000/api/manager/feedback-form", formData);
+            const response = await axios.post("http://localhost:5000/api/manager/feedback-form", formData, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
+                },
+            });
             alert(response.data.message);
 
             setFormData({

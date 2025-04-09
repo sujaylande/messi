@@ -11,7 +11,11 @@ function Menu() {
     }, []);
 
     const fetchMenu = async () => {
-        const res = await axios.get("http://localhost:5000/api/manager/display-menu");
+        const res = await axios.get("http://localhost:5000/api/manager/display-menu",   {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
+            },
+        });
         setMenu(res.data);
     };
 
