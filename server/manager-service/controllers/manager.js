@@ -263,7 +263,7 @@ module.exports.scan = (req, res) => {
     const block_no = req.manager.block_no;
 
     const checkQuery = `SELECT * FROM students WHERE block_no = ?;`;
-    db.query(checkQuery, (err, result) => {
+    db.query(checkQuery,[block_no], (err, result) => {
       if (err) {
         console.error("Database Error:", err);
         return res.status(500).json({ error: "Internal Server Error" });
@@ -593,14 +593,12 @@ module.exports.removeStudent = (req, res) => {
         return res.status(404).json({ error: "Student not found" });
       }
 
-      // delete student record query written in python script so if use foreign key concept
-      //  then it will automatically delete the attendace and all child records
-      const deleteAttendanceQuery = `DELETE FROM attendance WHERE reg_no = ? AND block_no = ?;`;
-      db.query(deleteAttendanceQuery, [reg_no, block_no], (err) => {
-        if (err) {
-          console.error("Database Error:", err);
-          return res.status(500).json({ error: "Internal Server Error" });
-        }
+      // const deleteAttendanceQuery = `DELETE FROM attendance WHERE reg_no = ? AND block_no = ?;`;
+      // db.query(deleteAttendanceQuery, [reg_no, block_no], (err) => {
+      //   if (err) {
+      //     console.error("Database Error:", err);
+      //     return res.status(500).json({ error: "Internal Server Error" });
+      //   }
 
         // Call the Python script
         const scriptPath = path.join(
@@ -630,7 +628,7 @@ module.exports.removeStudent = (req, res) => {
         res.status(200).json({ message: "Student removal process started!" });
 
       });
-    });
+    // });
   }catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });

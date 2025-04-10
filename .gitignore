@@ -9,3 +9,4 @@ server/student-service/node_modules
 server/student-service/.env
 server/student-service/scripts
 server/manager-service/scripts
+server/test

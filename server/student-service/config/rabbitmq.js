@@ -73,6 +73,8 @@ async function connectRabbitMQ() {
     await channel.assertQueue("feedback_queue"); // New queue for feedback
     await channel.assertQueue("attendance_queue");
     await channel.assertQueue("register_student_queue");
+    await channel.assertQueue("delete_student_queue");
+
 
     console.log("📌 Student connected to RabbitMQ...");
 
@@ -137,7 +139,7 @@ async function connectRabbitMQ() {
       if (msg !== null) {
         const registrationData = JSON.parse(msg.content.toString());
 
-        console.log(registrationData);
+        // console.log(registrationData);
 
         db.query(
           "INSERT INTO students (name, email, reg_no, roll_no, password, block_no) VALUES (?, ?, ?, ?, ?, ?)",
@@ -151,6 +153,43 @@ async function connectRabbitMQ() {
         channel.ack(msg);
       }
     });
+
+    channel.consume("delete_student_queue", async (msg) => {
+      if (msg !== null) {
+        const deleteData = JSON.parse(msg.content.toString());
+    
+        // console.log(deleteData);
+    
+        // Delete from students table
+        db.query(
+          "DELETE FROM students WHERE reg_no = ? AND block_no = ?;",
+          [deleteData.reg_no, deleteData.block_no],
+          (err) => {
+            if (err) {
+              console.error("❌ Error deleting student:", err.message);
+            } else {
+              // console.log("✅ Student deleted from Student Database.");
+    
+              // Delete from attendance table
+              db.query(
+                "DELETE FROM attendance WHERE reg_no = ? AND block_no = ?;",
+                [deleteData.reg_no, deleteData.block_no],
+                (err) => {
+                  if (err) {
+                    console.error("❌ Error deleting attendance:", err.message);
+                  } else {
+                    // console.log("✅ Attendance records deleted for the student.");
+                  }
+                }
+              );
+            }
+          }
+        );
+    
+        channel.ack(msg);
+      }
+    });
+    
 
   } catch (error) {
     console.error("🚨 RabbitMQ Connection Error:", error);
