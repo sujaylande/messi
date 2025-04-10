@@ -24,7 +24,7 @@ const StudentProtectWrapper = ({
         }).then(response => {
             if (response.status === 200) {
 
-                setStudent(response.data.captain)
+                setStudent(response.data.student)
                 setIsLoading(false)
             }
         })

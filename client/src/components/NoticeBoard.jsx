@@ -30,7 +30,11 @@ export default function NoticeBoard() {
   };
 
   const deleteNotice = async (id) => {
-    await axios.delete(`http://localhost:5000/api/manager/remove-notice/${id}`);
+    await axios.delete(`http://localhost:5000/api/manager/remove-notice/${id}`, {
+      headers: {
+          Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
+      },
+  });
     fetchNotices();
   };
 

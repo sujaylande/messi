@@ -797,8 +797,8 @@
 
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { StudentDataContext } from "../context/StudentContext";
 import { Calendar, Bell, User, Coffee, Utensils, Clock, Moon, Download, Star, ThumbsUp, Clipboard, AlertCircle } from 'lucide-react';
+import { StudentDataContext } from "../context/StudentContext";
 
 function StudentPublic() {
   const [menu, setMenu] = useState([]);
@@ -812,7 +812,7 @@ function StudentPublic() {
   const [activeTab, setActiveTab] = useState("menu");
   const { student, setStudent } = useContext(StudentDataContext);
 
-  // console.log("Student from context:", student);
+  console.log("Student from context:", student);
 
   const [formData, setFormData] = useState({
     reg_no: student?.reg_no || "",

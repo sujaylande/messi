@@ -131,7 +131,6 @@ module.exports.register = async (req, res) => {
   }
 };
 
-
 // module.exports.register = (req, res) => {
 //   try {
 //     const { name, email, reg_no, roll_no, password } = req.body;
@@ -656,34 +655,93 @@ module.exports.addNotice = async (req, res) => {
 };
 
 module.exports.displayNotice = (req, res) => {
-  db.query("SELECT * FROM notice_board", (err, results) => {
+  const block_no = req.manager.block_no;
+  db.query("SELECT * FROM notice_board WHERE block_no = ?",[block_no], (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(results);
   });
 };
 
-module.exports.removeNotice = (req, res) => {
+// module.exports.removeNotice = (req, res) => {
+//   const { id } = req.params;
+//   const block_no = req.manager.block_no;
+
+//   if (!id) {
+//     return res.status(400).json({ error: "id are required" });
+//   }
+
+//   const checkQuery = `SELECT * FROM notice_board WHERE id = ? AND block_no = ?;`;
+//   db.query(checkQuery, [id, block_no], (err, studentResult) => {
+//     if (err) {
+//       return res.status(500).json({ error: "Internal Server Error" });
+//     }
+
+//     if (studentResult.length === 0) {
+//       return res.status(404).json({ error: "Notice not found" });
+//     }
+//     db.query("DELETE FROM notice_board WHERE id = ? AND block_no = ?", [id, block_no], (err, result) => {
+//       if (err) return res.status(500).json({ error: err.message });
+//       res.json({ message: "Notice deleted successfully" });
+//     });
+//   });
+
+//   const channel = getChannel();
+//     if (channel) {
+//       await channel.assertQueue("remove_notice_queue");
+//       channel.sendToQueue("remove_notice_queue", Buffer.from(JSON.stringify({ id, block_no })));
+//       // console.log("Notice sent to queue");
+//     }
+// };
+
+module.exports.removeNotice = async (req, res) => {
   const { id } = req.params;
+  const block_no = req.manager.block_no;
 
   if (!id) {
-    return res.status(400).json({ error: "id are required" });
+    return res.status(400).json({ error: "id is required" });
   }
 
-  const checkQuery = `SELECT * FROM notice_board WHERE id = ?;`;
-  db.query(checkQuery, [reg_no], (err, studentResult) => {
-    if (err) {
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
+  const checkQuery = `SELECT * FROM notice_board WHERE id = ? AND block_no = ?;`;
+
+  // Wrap MySQL query in a Promise so you can await it
+  const queryAsync = (sql, params) =>
+    new Promise((resolve, reject) => {
+      db.query(sql, params, (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    });
+
+  try {
+    const studentResult = await queryAsync(checkQuery, [id, block_no]);
 
     if (studentResult.length === 0) {
       return res.status(404).json({ error: "Notice not found" });
     }
-    db.query("DELETE FROM notice_board WHERE id = ?", [id], (err, result) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ message: "Notice deleted successfully" });
-    });
-  });
+
+    await queryAsync(
+      "DELETE FROM notice_board WHERE id = ? AND block_no = ?",
+      [id, block_no]
+    );
+
+    // Now send to RabbitMQ queue
+    const channel = getChannel(); // make sure this is already established
+    if (channel) {
+      await channel.assertQueue("remove_notice_queue");
+      channel.sendToQueue(
+        "remove_notice_queue",
+        Buffer.from(JSON.stringify({ id, block_no }))
+      );
+    }
+
+    res.json({ message: "Notice deleted successfully" });
+
+  } catch (err) {
+    console.error("Error removing notice:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 };
+
 
 module.exports.addMenu = async (req, res) => {
   const { items, meal_slot } = req.body;
@@ -725,9 +783,11 @@ module.exports.addMenu = async (req, res) => {
 
 module.exports.displayMenu = (req, res) => {
   const today = format(new Date(), "yyyy-MM-dd");
+  const block_no = req.manager.block_no;
+
   db.query(
-    "SELECT * FROM menu WHERE DATE(timestamp) = ?",
-    [today],
+    "SELECT * FROM menu WHERE DATE(timestamp) = ? AND block_no = ?",
+    [today, block_no],
     (err, results) => {
       if (err) return res.status(500).json({ error: err.message });
       res.json(results);
@@ -735,48 +795,49 @@ module.exports.displayMenu = (req, res) => {
   );
 };
 
-module.exports.feedbackForm = async (req, res) => {
-  const { reg_no, meal_type, taste, hygiene, quantity, want_change, comments } =
-    req.body;
+// module.exports.feedbackForm = async (req, res) => {
+//   const { reg_no, meal_type, taste, hygiene, quantity, want_change, comments } =
+//     req.body;
 
-  try {
-    if (
-      !reg_no ||
-      !meal_type ||
-      !taste ||
-      !hygiene ||
-      !quantity ||
-      !want_change
-    ) {
-      return res.status(400).json({
-        error:
-          "reg_no, meal_type, taste, hygiene, quantity and want_change  are required",
-      });
-    }
+//   try {
+//     if (
+//       !reg_no ||
+//       !meal_type ||
+//       !taste ||
+//       !hygiene ||
+//       !quantity ||
+//       !want_change
+//     ) {
+//       return res.status(400).json({
+//         error:
+//           "reg_no, meal_type, taste, hygiene, quantity and want_change  are required",
+//       });
+//     }
 
-    const query = `INSERT INTO feedback (reg_no, meal_type, taste_rating, hygiene_rating, quantity_rating, want_change, comments, feedback_date) 
-                   VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE())`;
+//     const query = `INSERT INTO feedback (reg_no, meal_type, taste_rating, hygiene_rating, quantity_rating, want_change, comments, feedback_date) 
+//                    VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE())`;
 
-    await db.execute(query, [
-      reg_no,
-      meal_type,
-      taste,
-      hygiene,
-      quantity,
-      want_change,
-      comments,
-    ]);
+//     await db.execute(query, [
+//       reg_no,
+//       meal_type,
+//       taste,
+//       hygiene,
+//       quantity,
+//       want_change,
+//       comments,
+//     ]);
 
-    res.status(201).json({ message: "Feedback submitted successfully!" });
-  } catch (error) {
-    console.error("Error submitting feedback:", error);
-    res.status(500).json({ error: "Server error" });
-  }
-};
+//     res.status(201).json({ message: "Feedback submitted successfully!" });
+//   } catch (error) {
+//     console.error("Error submitting feedback:", error);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// };
 
 module.exports.displayNegativeFeedbacks = async (req, res) => {
   try{
     const cachedData = cache.get("negative_comments");
+    const block_no = req.manager.block_no;
 
     if (cachedData) {
       // console.log("negative_comments form node-cache...");
@@ -784,7 +845,7 @@ module.exports.displayNegativeFeedbacks = async (req, res) => {
     }
 
     const scriptPath = path.resolve(__dirname, "..", "scripts", "python", "feedback_analyzer.py");
-    const pythonProcess = spawn("python", [scriptPath]);
+    const pythonProcess = spawn("python", [scriptPath, block_no]);
 
     let data = "";
     pythonProcess.stdout.on("data", (chunk) => {
@@ -812,6 +873,7 @@ module.exports.displayNegativeFeedbacks = async (req, res) => {
 };
 
 module.exports.feedbackStatistics = (req, res) => {
+  const block_no = req.manager.block_no;
   const query = `
       SELECT 
           meal_type,
@@ -821,11 +883,11 @@ module.exports.feedbackStatistics = (req, res) => {
           AVG(quantity_rating) as avg_quantity,
           SUM(want_change) as change_requests
       FROM feedback 
-      WHERE DATE(feedback_date) = CURDATE()
+      WHERE DATE(feedback_date) = CURDATE() AND block_no = ?
       GROUP BY meal_type;
   `;
 
-  db.execute(query, (error, results) => {
+  db.execute(query, [block_no], (error, results) => {
     if (error) {
       console.error("Error fetching feedback stats:", error);
       return res.status(500).json({ error: "Internal server error" });

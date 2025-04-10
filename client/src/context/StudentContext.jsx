@@ -7,7 +7,7 @@ const StudentContext = ({ children }) => {
     const [ isLoading, setIsLoading ] = useState(false);
     const [ error, setError ] = useState(null);
 
-    const updateCaptain = (StudentData) => {
+    const updateStudent = (StudentData) => {
         setStudent(StudentData);
     };
 
@@ -18,7 +18,7 @@ const StudentContext = ({ children }) => {
         setIsLoading,
         error,
         setError,
-        updateCaptain
+        updateStudent
     };
 
     return (

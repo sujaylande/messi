@@ -74,6 +74,8 @@ async function connectRabbitMQ() {
     await channel.assertQueue("attendance_queue");
     await channel.assertQueue("register_student_queue");
     await channel.assertQueue("delete_student_queue");
+    await channel.assertQueue("remove_notice_queue");
+
 
 
     console.log("📌 Student connected to RabbitMQ...");
@@ -182,6 +184,30 @@ async function connectRabbitMQ() {
                   }
                 }
               );
+            }
+          }
+        );
+    
+        channel.ack(msg);
+      }
+    });
+
+    
+    channel.consume("remove_notice_queue", async (msg) => {
+      if (msg !== null) {
+        const deleteData = JSON.parse(msg.content.toString());
+    
+        // console.log(deleteData);
+    
+        // Delete from students table
+        db.query(
+          "DELETE FROM notice_board WHERE id = ? AND block_no = ?;",
+          [deleteData.id, deleteData.block_no],
+          (err) => {
+            if (err) {
+              console.error("❌ Error deleting student:", err.message);
+            } else {
+              // console.log("✅ notice deleted from Student Database.");
             }
           }
         );

@@ -24,7 +24,7 @@ const ManagerProtectWrapper = ({
         }).then(response => {
             if (response.status === 200) {
 
-                setManager(response.data.captain)
+                setManager(response.data.manager)
                 setIsLoading(false)
             }
         })

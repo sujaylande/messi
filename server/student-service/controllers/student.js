@@ -189,6 +189,8 @@ module.exports.feedbackForm = async (req, res) => {
   try {
     const { reg_no, block_no, meal_type, taste, hygiene, quantity, want_change, comments } = req.body;
 
+    console.log(req.body)
+
     if (!reg_no || !block_no || !meal_type || !taste || !hygiene || !quantity) {
       return res.status(400).json({
         error: "reg_no, meal_type, taste, hygiene, quantity, and want_change are required",

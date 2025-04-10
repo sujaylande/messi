@@ -7,7 +7,7 @@ const ManagerContext = ({ children }) => {
     const [ isLoading, setIsLoading ] = useState(false);
     const [ error, setError ] = useState(null);
 
-    const updateCaptain = (ManagerData) => {
+    const updateManager = (ManagerData) => {
         setManager(ManagerData);
     };
 
@@ -18,7 +18,7 @@ const ManagerContext = ({ children }) => {
         setIsLoading,
         error,
         setError,
-        updateCaptain
+        updateManager
     };
 
     return (
