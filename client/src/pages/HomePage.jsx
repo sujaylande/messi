@@ -1,16 +1,22 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import axios from "axios"
 import { Link } from "react-router-dom"
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts"
 import { ScanLine, UserPlus } from "lucide-react"
+import { ManagerDataContext } from '../context/ManagerContext';
+
 
 const HomePage = () => {
   const [studentStats, setStudentStats] = useState({ active: 0, inactive: 0 })
   const [attendanceToday, setAttendanceToday] = useState([])
   const [forecast, setForecast] = useState({})
   const [loading, setLoading] = useState(true)
+  const { manager, setManager } = useContext(ManagerDataContext);
+
+  console.log("home",manager)
+  
 
   const fetchStudentStats = async () => {
     try {
@@ -86,7 +92,10 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
+              <h1 className="text-xl font-bold text-gray-900">{manager?.mess_name}</h1>
+              <h3 className="text-xl font-bold text-gray-900">{manager?.block_no}</h3>
+              <h3 className="text-xl font-bold text-gray-900">{manager?.name}</h3>
+
             </div>
             <div className="flex items-center space-x-4">
               <Link

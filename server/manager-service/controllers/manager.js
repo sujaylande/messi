@@ -132,6 +132,8 @@ module.exports.managerLogin = (req, res) => {
 
     const manager = results[0];
 
+    console.log(manager)
+
     try {
       const isMatch = await bcrypt.compare(password, manager.password);
       if (!isMatch) {
@@ -144,6 +146,7 @@ module.exports.managerLogin = (req, res) => {
           block_no: manager.block_no,
           name: manager.name,
           role: manager.role,
+          mess_name: manager.mess_name,
         },
         process.env.JWT_SECRET,
         { expiresIn: '2h' }

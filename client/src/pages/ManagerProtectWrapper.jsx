@@ -71,6 +71,7 @@ const ManagerProtectWrapper = ({ children }) => {
     })
       .then((response) => {
         if (response.status === 200 && response.data?.manager) {
+          console.log("profile", response.data.manager)
           setManager(response.data.manager);
         } else {
           navigate('/manager/login');
