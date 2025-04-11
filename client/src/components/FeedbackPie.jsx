@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+axios.defaults.withCredentials = true;
+
 
 const COLORS = ["#FF5733", "#FFC300", "#FF5733", "#33FF57", "#3380FF"];
 
@@ -8,11 +10,7 @@ export default function FeedbackPie() {
     const [feedbackData, setFeedbackData] = useState([]);
 
     useEffect(() => {
-        axios.get("http://localhost:5000/api/manager/feedback-stats",   {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
-            },
-        })
+        axios.get("http://localhost:5000/api/manager/feedback-stats")
             .then(response => {
                 setFeedbackData(response.data);
             })

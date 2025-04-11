@@ -6,11 +6,10 @@ const util = require("util");
 const query = util.promisify(db.query).bind(db);
 
 module.exports.authStudent = async (req, res, next) => {
-  // const token = req.cookies['student-token'] || req.headers.authorization?.split(' ')[1];
-
   let token = null;
 
-  if (req.cookies["student-token"]) {
+  // Extract token from cookie or Authorization header
+  if (req.cookies && req.cookies["student-token"]) {
     token = req.cookies["student-token"];
   } else if (
     req.headers.authorization &&
@@ -19,7 +18,8 @@ module.exports.authStudent = async (req, res, next) => {
     token = req.headers.authorization.split(" ")[1];
   }
 
-  if (!token) {
+  // If token is missing or empty, return 401 early
+  if (!token || token.trim() === "") {
     return res.status(401).json({ message: "Unauthorized: No token provided" });
   }
 
@@ -27,20 +27,15 @@ module.exports.authStudent = async (req, res, next) => {
     // Verify JWT
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+    // Ensure role is student
     if (decoded.role !== "student") {
       return res.status(403).json({ message: "Forbidden: Not a student" });
     }
 
-    // Find manager in DB
-    // const [student] = await query('SELECT * FROM students WHERE email = ?', [decoded.email]);
-    // if (!student) {
-    //   return res.status(401).json({ message: 'Unauthorized: Student not found' });
-    // }
-
     req.student = decoded;
     next();
   } catch (err) {
-    console.error("AuthStudent Error:", err);
-    res.status(401).json({ message: "Unauthorized" });
+    console.error("AuthStudent Error:", err.message); // Avoid printing full stack in production
+    return res.status(401).json({ message: "Unauthorized: Invalid token" });
   }
 };

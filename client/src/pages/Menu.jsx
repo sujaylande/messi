@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { MenuForm } from "../components/MenuForm";
 import { MenuBoard } from "../components/MenuBoard";
+axios.defaults.withCredentials = true;
+
 
 function Menu() {
     const [menu, setMenu] = useState([]);
@@ -11,11 +13,7 @@ function Menu() {
     }, []);
 
     const fetchMenu = async () => {
-        const res = await axios.get("http://localhost:5000/api/manager/display-menu",   {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
-            },
-        });
+        const res = await axios.get("http://localhost:5000/api/manager/display-menu");
         setMenu(res.data);
     };
 

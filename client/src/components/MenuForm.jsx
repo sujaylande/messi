@@ -1,5 +1,7 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
+axios.defaults.withCredentials = true;
+
 
 export function MenuForm({ fetchMenu }) {
   const [items, setItems] = useState("");
@@ -20,11 +22,7 @@ export function MenuForm({ fetchMenu }) {
     formData.append("image", image);
 
     try {
-      const response = await axios.post("http://localhost:5000/api/manager/add-menu", formData, {
-        headers: { "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${localStorage.getItem("manager-token")}`
-         },
-      });
+      const response = await axios.post("http://localhost:5000/api/manager/add-menu", formData);
 
       if (response.data.message) {
         // alert(response.data.message);

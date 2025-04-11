@@ -1,55 +1,91 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { StudentDataContext } from '../context/StudentContext'
-import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+// import React, { useContext, useEffect, useState } from 'react'
+// import { StudentDataContext } from '../context/StudentContext'
+// import { useNavigate } from 'react-router-dom'
+// import axios from 'axios'
 
-const StudentProtectWrapper = ({
-    children
-}) => {
+// const StudentProtectWrapper = ({
+//     children
+// }) => {
 
-    const token = localStorage.getItem('student-token')
-    const navigate = useNavigate()
-    const { student, setStudent } = useContext(StudentDataContext)
-    const [ isLoading, setIsLoading ] = useState(true)
+//     const token = localStorage.getItem('student-token')
+//     const navigate = useNavigate()
+//     const { student, setStudent } = useContext(StudentDataContext)
+//     const [ isLoading, setIsLoading ] = useState(true)
 
-    useEffect(() => {
-        if (!token) {
-            navigate('/student/login')
-        }
+//     useEffect(() => {
+//         if (!token) {
+//             navigate('/')
+//         }
 
-        axios.get("http://localhost:5001/api/student/profile", {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        }).then(response => {
-            if (response.status === 200) {
+//         axios.get("http://localhost:5001/api/student/profile").then(response => {
+//             if (response.status === 200) {
 
-                setStudent(response.data.student)
-                setIsLoading(false)
-            }
-        })
-            .catch(err => {
+//                 setStudent(response.data.student)
+//                 setIsLoading(false)
+//             }
+//         })
+//             .catch(err => {
 
-                localStorage.removeItem('student-token')
-                navigate('/student/login')
-            })
-    }, [ token ])
+//                 // localStorage.removeItem('student-token')
+//                 navigate('/')
+//             })
+//     }, [ token ])
 
     
 
-    if (isLoading) {
-        return (
-            <div>Loading...</div>
-        )
-    }
+//     if (isLoading) {
+//         return (
+//             <div>Loading...</div>
+//         )
+//     }
 
 
 
-    return (
-        <>
-            {children}
-        </>
-    )
-}
+//     return (
+//         <>
+//             {children}
+//         </>
+//     )
+// }
 
-export default StudentProtectWrapper
+// export default StudentProtectWrapper
+
+import React, { useContext, useEffect, useState } from 'react';
+import { StudentDataContext } from '../context/StudentContext';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+const StudentProtectWrapper = ({ children }) => {
+  const navigate = useNavigate();
+  const { student, setStudent } = useContext(StudentDataContext);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch the student profile — the cookie will be sent automatically
+    axios.get("http://localhost:5001/api/student/profile", {
+      withCredentials: true // Just in case axios.defaults.withCredentials isn't set
+    })
+      .then((response) => {
+        if (response.status === 200 && response.data?.student) {
+          setStudent(response.data.student);
+        } else {
+          navigate('/');
+        }
+      })
+      .catch((err) => {
+        console.error("Auth check failed:", err?.response?.data?.message || err.message);
+        navigate('/');
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  return <>{children}</>;
+};
+
+export default StudentProtectWrapper;

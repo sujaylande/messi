@@ -21,12 +21,7 @@ const StudentMessAttendance = () => {
 
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/manager/student-stat/${regNo}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
-          },
-        }
+        `http://localhost:5000/api/manager/student-stat/${regNo}`
       );
       setAttendanceData(response.data.attendance);
       setTotalAmount(response.data.totalAmount);
@@ -53,11 +48,6 @@ const StudentMessAttendance = () => {
         {
           reg_no: actionRegNo,
           status: status,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
-          },
         }
       );
 
@@ -82,13 +72,7 @@ const StudentMessAttendance = () => {
 
     try {
       const response = await axios.delete(
-        `http://localhost:5000/api/manager/remove-student/${removeRegNo}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
-          },
-         
-        }
+        `http://localhost:5000/api/manager/remove-student/${removeRegNo}`
       );
       if (response.status === 404) {
         alert("Student not found");

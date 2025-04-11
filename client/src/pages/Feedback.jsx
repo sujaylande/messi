@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react"
 import axios from "axios"
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, Label } from "recharts"
+axios.defaults.withCredentials = true;
+
 
 export default function FeedbackInsights() {
   const [feedbackStats, setFeedbackStats] = useState([])
@@ -15,16 +17,8 @@ export default function FeedbackInsights() {
       try {
         setLoading(true)
         const [statsResponse, commentsResponse] = await Promise.all([
-          axios.get("http://localhost:5000/api/manager/feedback-stats",   {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
-            },
-        }),
-          axios.get("http://localhost:5000/api/manager/negative-feedback",   {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
-            },
-        }),
+          axios.get("http://localhost:5000/api/manager/feedback-stats"),
+          axios.get("http://localhost:5000/api/manager/negative-feedback"),
         ])
 
         // Data validation and transformation

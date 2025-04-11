@@ -20,7 +20,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<ManagerProtectWrapper><HomePage /></ManagerProtectWrapper>} />
+        <Route path="/homepage" element={<ManagerProtectWrapper><HomePage /></ManagerProtectWrapper>} />
         <Route path="/mess-stat" element={<ManagerProtectWrapper><MessStatistics/></ManagerProtectWrapper>} />
         <Route path="/student-stat" element={<ManagerProtectWrapper><StudentMessAttendance/></ManagerProtectWrapper>} />
         <Route path="/scan" element={<ManagerProtectWrapper><Scan/></ManagerProtectWrapper>} />
@@ -30,7 +30,7 @@ function App() {
         <Route path="/feedback" element={<ManagerProtectWrapper><FeedbackInsights/></ManagerProtectWrapper>} />
         <Route path="/notice-board" element={<ManagerProtectWrapper><NoticeBoard/></ManagerProtectWrapper>} />
         <Route path="/manager/login" element={<ManagerLogin/>} />
-        <Route path="/student/login" element={<StudentLogin/>} />
+        <Route path="/" element={<StudentLogin/>} />
         <Route path="*" element={<h1>Not Found</h1>} />
       </Routes>
     </Router>

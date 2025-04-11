@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { ManagerDataContext } from '../context/ManagerContext'
+import { Link } from 'react-router-dom'
 
 const ManagerLogin = () => {
 
@@ -20,11 +21,7 @@ const ManagerLogin = () => {
       password
     }
 
-    const response = await axios.post("http://localhost:5000/api/manager/login", manager,   {
-      headers: {
-          Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
-      },
-  })
+    const response = await axios.post("http://localhost:5000/api/manager/login", manager)
 
     if (response.status === 200) {
       const data = response.data
@@ -33,8 +30,8 @@ const ManagerLogin = () => {
 
       console.log(data.manager)
 
-      localStorage.setItem('manager-token', data.token)
-      navigate('/')
+      // localStorage.setItem('manager-token', data.token)
+      navigate('/homepage')
 
     } else {
       navigate('/manager-login')
@@ -78,6 +75,12 @@ const ManagerLogin = () => {
           >Login</button>
 
         </form>
+        <Link
+                to="/student/login"
+                className="text-green-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Student Login?
+              </Link>
       </div>
     </div>
   )

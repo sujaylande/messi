@@ -10,14 +10,105 @@ const { getChannel } = require("../config/rabbitmq.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const util = require("util");
+const { getCurrentMeal } = require('../utils/mealHelper.js'); // assuming you have this function elsewhere
+const { error } = require("console");
 
 
 const query = util.promisify(db.query).bind(db);
 
 
 
+module.exports.scanManually = async (req, res) => {
+  const { reg_no } = req.body;
+  const block_no = req.manager?.block_no;
+
+  const { slot: currentslot, cost: mealcost } = getCurrentMeal();
+
+
+  if (!currentslot) {
+    return res.status(200).json({message: "Mess is closed, come in the next slot."});
+  }
+
+  const mealslot = currentslot.charAt(0).toUpperCase() + currentslot.slice(1); // Capitalize
+
+
+  const now = new Date();
+  const date = now.toISOString().split("T")[0]; // YYYY-MM-DD
+  // const timestamp = now.toISOString().slice(0, 19).replace("T", " "); // YYYY-MM-DD HH:MM:SS
+
+  //to convert into local time
+const timestamp = now.getFullYear() + "-" +
+  String(now.getMonth() + 1).padStart(2, '0') + "-" +
+  String(now.getDate()).padStart(2, '0') + " " +
+  String(now.getHours()).padStart(2, '0') + ":" +
+  String(now.getMinutes()).padStart(2, '0') + ":" +
+  String(now.getSeconds()).padStart(2, '0');
+
+
+  try {
+    // Check if student is registered
+    const studentRows = await query(
+      "SELECT * FROM students WHERE reg_no = ? AND block_no = ?",
+      [reg_no, block_no]
+    );
+
+    if (studentRows.length === 0) {
+      return res.status(200).json({message:"Not registered, you have to pay."});
+    }
+
+    // Check if already eaten
+    const attendanceRows = await query(
+      "SELECT * FROM attendance WHERE reg_no = ? AND date = ? AND meal_slot = ? AND block_no = ?",
+      [reg_no, date, mealslot, block_no]
+    );
+
+    if (attendanceRows.length > 0) {
+      return res.status(200).json({message : "You have already eaten."});
+    }
+
+    // Mark attendance
+    await query(
+      `INSERT INTO attendance 
+        (reg_no, date, meal_slot, meal_cost, timestamp, block_no)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [reg_no, date, mealslot, mealcost, timestamp, block_no]
+    );
+    const attendanceData = {
+      "reg_no": reg_no,
+      "date": date,
+      "meal_slot": mealslot,     // ✅ matches expected key
+      "meal_cost": mealcost,
+      "block_no": block_no,
+      "timestamp": timestamp,
+    }
+    
+
+    const channel = getChannel();
+    if (channel) {
+      await channel.assertQueue("attendance_queue");
+      channel.sendToQueue("attendance_queue", Buffer.from(JSON.stringify(attendanceData)));
+      // console.log("attendance sent to queue");
+    }
+
+    return res.status(200).json({message: "Attendance marked successfully."});
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({error:"Server error."});
+  }
+};
+
+
 module.exports.getManagerProfile = async (req, res, next) => {
   res.status(200).json({ manager: req.manager });
+}
+
+module.exports.managerLogout = (req, res) => {
+  res.clearCookie("manager-token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Strict",
+  });
+  res.status(200).json({ message: "Logout successful" });
 }
 
 module.exports.managerLogin = (req, res) => {
@@ -61,8 +152,16 @@ module.exports.managerLogin = (req, res) => {
       // avoid naming conflict
       const { password: dbPassword, ...managerWithoutPassword } = manager;
 
-      res.cookie('manager-token', token);
-      res.status(200).json({ token, manager: managerWithoutPassword });
+      // res.cookie('manager-token', token);
+      // res.cookie('student-token', token);
+      res.cookie('manager-token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+        maxAge: 2 * 60 * 60 * 1000, // 2 hours
+      });
+
+      res.status(200).json({ manager: managerWithoutPassword });
 
     } catch (compareError) {
       console.error(compareError);

@@ -16,6 +16,9 @@ router.get('/profile', authStudent, studentController.getStudentProfile)
 
 router.post('/login', studentController.studentLogin)
 
+router.get('/logout', studentController.studentLogout)
+
+
 
 module.exports = router;
 

@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+axios.defaults.withCredentials = true;
+
 
 export default function FeedbackInsights() {
     const [negativeComments, setNegativeComments] = useState([]);
 
     useEffect(() => {
-        axios.get("http://localhost:5000/api/manager/negative-feedback",   {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
-            },
-        })
+        axios.get("http://localhost:5000/api/manager/negative-feedback")
             .then(response => {
                 setNegativeComments(response.data);
             })

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import axios from "axios";
+axios.defaults.withCredentials = true;
+
 
 import {
   ChevronDown,
@@ -78,10 +80,7 @@ const MessStatistics = () => {
     setIsLoading(true)
   
     axios
-      .get(`http://localhost:5000/api/manager/students-status-list?status=${status}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("manager-token")}`,        },
-      })
+      .get(`http://localhost:5000/api/manager/students-status-list?status=${status}`)
       .then((res) => {
         setStudents(res.data)
         setIsLoading(false)
@@ -97,10 +96,7 @@ const MessStatistics = () => {
     setIsLoading(true)
   
     axios
-      .get('http://localhost:5000/api/manager/mess-stat', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("manager-token")}`,        },
-      })
+      .get('http://localhost:5000/api/manager/mess-stat')
       .then((res) => {
         setData(res.data)
         setIsLoading(false)

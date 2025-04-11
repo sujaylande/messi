@@ -9,9 +9,10 @@ module.exports.authManager = async (req, res, next) => {
   
   const token = req.headers.authorization?.split(' ')[1] || req.cookies['manager-token'];
 
-  if (!token) {
-    return res.status(401).json({ message: 'Unauthorized: No token provided' });
-  }
+ // If token is missing or empty, return 401 early
+ if (!token || token.trim() === "") {
+  return res.status(401).json({ message: "Unauthorized: No token provided" });
+}
 
   try {
 
@@ -22,16 +23,10 @@ module.exports.authManager = async (req, res, next) => {
       return res.status(403).json({ message: 'Forbidden: Not a manager' });
     }
 
-    // Find manager in DB
-    // const [manager] = await query('SELECT * FROM managers WHERE email = ?', [decoded.email]);
-    // if (!manager) {
-    //   return res.status(401).json({ message: 'Unauthorized: Manager not found' });
-    // }
-
     req.manager = decoded;
     next();
   } catch (err) {
-    console.error('AuthManager Error:', err);
+    console.error('AuthManager Error:', err.message);
     res.status(401).json({ message: 'Unauthorized' });
   }
 };

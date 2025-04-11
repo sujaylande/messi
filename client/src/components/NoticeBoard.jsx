@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+axios.defaults.withCredentials = true;
 
 export default function NoticeBoard() {
   const [notice, setNotice] = useState("");
@@ -10,31 +11,19 @@ export default function NoticeBoard() {
   }, []);
 
   const fetchNotices = async () => {
-    const res = await axios.get("http://localhost:5000/api/manager/display-notices",   {
-      headers: {
-          Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
-      },
-  });
+    const res = await axios.get("http://localhost:5000/api/manager/display-notices");
     setNotices(res.data);
   };
 
   const addNotice = async () => {
     if (!notice.trim()) return;
-    await axios.post("http://localhost:5000/api/manager/add-notice", { notice }, {
-      headers: {
-          Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
-      },
-  });
+    await axios.post("http://localhost:5000/api/manager/add-notice", { notice });
     setNotice("");
     fetchNotices();
   };
 
   const deleteNotice = async (id) => {
-    await axios.delete(`http://localhost:5000/api/manager/remove-notice/${id}`, {
-      headers: {
-          Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
-      },
-  });
+    await axios.delete(`http://localhost:5000/api/manager/remove-notice/${id}`);
     fetchNotices();
   };
 

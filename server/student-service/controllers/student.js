@@ -8,6 +8,15 @@ module.exports.getStudentProfile = async (req, res, next) => {
   res.status(200).json({ student: req.student });
 }
 
+module.exports.studentLogout = (req, res) => {
+  res.clearCookie("student-token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Strict",
+  });
+  res.status(200).json({ message: "Logout successful" });
+}
+
 module.exports.studentLogin = (req, res) => {
   const { email, password } = req.body;
 
@@ -52,8 +61,15 @@ module.exports.studentLogin = (req, res) => {
       // avoid naming conflict
       const { password: dbPassword, ...studentWithoutPassword } = student;
 
-      res.cookie('student-token', token);
-      res.status(200).json({ token, student: studentWithoutPassword });
+      // res.cookie('student-token', token);
+      res.cookie('student-token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+        maxAge: 2 * 60 * 60 * 1000, // 2 hours
+      });
+      
+      res.status(200).json({ student: studentWithoutPassword });
 
     } catch (compareError) {
       console.error(compareError);

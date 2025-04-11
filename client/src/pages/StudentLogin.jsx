@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { StudentDataContext } from '../context/StudentContext'
+import { Link } from 'react-router-dom'
+
 
 const StudentLogin = () => {
 
@@ -19,23 +21,19 @@ const StudentLogin = () => {
       password
     }
 
-    const response = await axios.post("http://localhost:5001/api/student/login", student,   {
-      headers: {
-          Authorization: `Bearer ${localStorage.getItem("student-token")}`,
-      },
-  })
+    const response = await axios.post("http://localhost:5001/api/student/login", student)
+
 
     if (response.status === 200) {
       const data = response.data
 
       setStudent(data.student)
 
-
-      localStorage.setItem('student-token', data.token)
+      // localStorage.setItem('student-token', data.token)
       navigate('/student-public')
 
     } else {
-      navigate('/student-login')
+      navigate('/')
     }
 
     setEmail('')
@@ -76,6 +74,12 @@ const StudentLogin = () => {
           >Login</button>
 
         </form>
+        <Link
+                to="/manager/login"
+                className="text-green-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Manager Login?
+              </Link>
       </div>
     </div>
   )
