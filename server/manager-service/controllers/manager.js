@@ -230,131 +230,6 @@ module.exports.register = async (req, res) => {
   }
 };
 
-// module.exports.register = (req, res) => {
-//   try {
-//     const { name, email, reg_no, roll_no, password } = req.body;
-
-//     const block_no = req.manager.block_no;
-
-//     // console.log(name, email, reg_no, roll_no, password);
-
-//     if (!name || !email || !reg_no || !roll_no || !password) {
-//       return res
-//         .status(400)
-//         .json({ error: "Name, email, reg_no, and roll_no are required" });
-//     }
-
-//     db.query(
-//       "SELECT * FROM students WHERE block_no = ? AND (email = ? OR roll_no = ? OR reg_no = ?)",
-//       [block_no, email, roll_no, reg_no],
-//       (err, result) => {
-//         if (err) {
-//           return res.status(500).json({ error: err.message });
-//         }
-//         if (result.length) {
-//           return res.status(400).json({ error: "Student with this email, roll number, or registration number already exists in this block" });
-//         }
-    
-//         // Trigger Python Script
-//         const scriptPath = path.join(
-//           __dirname,
-//           "..", // Go up one level from controllers
-//           "scripts",
-//           "python",
-//           "add_faces.py"
-//         );
-    
-//         console.log("in reg", scriptPath);
-
-//         const hashedPassword = await bcrypt.hash(password, 10);
-    
-//         const python = spawn("python", [
-//           scriptPath,
-//           name,
-//           email,
-//           reg_no,
-//           roll_no,
-//           hashedPassword,
-//           block_no
-//         ]);
-    
-//         let output = "";
-//         let error = "";
-    
-//         python.stdout.on("data", (data) => {
-//           output += data.toString();
-//         });
-    
-//         python.stderr.on("data", (data) => {
-//           error += data.toString();
-//         });
-    
-//         python.on("close", (code) => {
-//           console.log(`Python script exited with code ${code}`);
-//         });
-    
-//         res
-//           .status(201)
-//           .json({ message: "Registration process started in background!" });
-//       }
-//     );    
-
-//     // db.query(
-//     //   "SELECT * FROM students WHERE email = ? OR roll_no = ? OR reg_no = ?",
-//     //   [email, roll_no, reg_no],
-//     //   (err, result) => {
-//     //     if (err) {
-//     //       return res.status(500).json({ error: err.message });
-//     //     }
-//     //     if (result.length) {
-//     //       return res.status(400).json({ error: "Student with this email, roll number, or registration number already exists" });
-//     //     }
-
-//     //     // Trigger Python Script
-//     //     const scriptPath = path.join(
-//     //       __dirname,
-//     //       "..", // Go up one level from controllers
-//     //       "scripts",
-//     //       "python",
-//     //       "add_faces.py"
-//     //     );
-
-//     //     console.log("in reg", scriptPath);
-
-//     //     const python = spawn("python", [
-//     //       scriptPath,
-//     //       name,
-//     //       email,
-//     //       reg_no,
-//     //       roll_no,
-//     //       password
-//     //     ]);
-
-//     //     let output = "";
-//     //     let error = "";
-
-//     //     python.stdout.on("data", (data) => {
-//     //       output += data.toString();
-//     //     });
-
-//     //     python.stderr.on("data", (data) => {
-//     //       error += data.toString();
-//     //     });
-
-//     //     python.on("close", (code) => {
-//     //       console.log(`Python script exited with code ${code}`);
-//     //     });
-
-//     //     res
-//     //       .status(201)
-//     //       .json({ message: "Registration process started in background!" });
-//     //   }
-//     // );
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// };
 
 module.exports.scan = (req, res) => {
   try {
@@ -401,33 +276,6 @@ module.exports.scan = (req, res) => {
   }
 };
 
-// module.exports.messStatistics = (req, res) => {
-//   try{
-//     const block_no = req.manager.block_no;
-
-//       const query = `
-//         SELECT 
-//         DATE_FORMAT(date, '%d-%m-%Y') AS formatted_date,
-//         SUM(CASE WHEN meal_slot = 'Breakfast' THEN 1 ELSE 0 END) AS breakfast_count,
-//         SUM(CASE WHEN meal_slot = 'Lunch' THEN 1 ELSE 0 END) AS lunch_count,
-//         SUM(CASE WHEN meal_slot = 'Snack' THEN 1 ELSE 0 END) AS snack_count,
-//         SUM(CASE WHEN meal_slot = 'Dinner' THEN 1 ELSE 0 END) AS dinner_count
-//     FROM attendance
-//     GROUP BY formatted_date
-//     ORDER BY STR_TO_DATE(formatted_date, '%d-%m-%Y') DESC;`;
-
-//       db.query(query, (err, result) => {
-//         if (err) {
-//           console.error("Error fetching attendance summary:", err);
-//           return res.status(500).json({ error: "Internal Server Error" });
-//         }
-//         res.json(result);
-//       });
-//     }catch (err) {
-//       console.error(err);
-//       res.status(500).json({ error: "Internal server error" });
-//     }
-// };
 
 module.exports.messStatistics = (req, res) => {
   try {
@@ -761,37 +609,6 @@ module.exports.displayNotice = (req, res) => {
   });
 };
 
-// module.exports.removeNotice = (req, res) => {
-//   const { id } = req.params;
-//   const block_no = req.manager.block_no;
-
-//   if (!id) {
-//     return res.status(400).json({ error: "id are required" });
-//   }
-
-//   const checkQuery = `SELECT * FROM notice_board WHERE id = ? AND block_no = ?;`;
-//   db.query(checkQuery, [id, block_no], (err, studentResult) => {
-//     if (err) {
-//       return res.status(500).json({ error: "Internal Server Error" });
-//     }
-
-//     if (studentResult.length === 0) {
-//       return res.status(404).json({ error: "Notice not found" });
-//     }
-//     db.query("DELETE FROM notice_board WHERE id = ? AND block_no = ?", [id, block_no], (err, result) => {
-//       if (err) return res.status(500).json({ error: err.message });
-//       res.json({ message: "Notice deleted successfully" });
-//     });
-//   });
-
-//   const channel = getChannel();
-//     if (channel) {
-//       await channel.assertQueue("remove_notice_queue");
-//       channel.sendToQueue("remove_notice_queue", Buffer.from(JSON.stringify({ id, block_no })));
-//       // console.log("Notice sent to queue");
-//     }
-// };
-
 module.exports.removeNotice = async (req, res) => {
   const { id } = req.params;
   const block_no = req.manager.block_no;
@@ -894,44 +711,6 @@ module.exports.displayMenu = (req, res) => {
   );
 };
 
-// module.exports.feedbackForm = async (req, res) => {
-//   const { reg_no, meal_type, taste, hygiene, quantity, want_change, comments } =
-//     req.body;
-
-//   try {
-//     if (
-//       !reg_no ||
-//       !meal_type ||
-//       !taste ||
-//       !hygiene ||
-//       !quantity ||
-//       !want_change
-//     ) {
-//       return res.status(400).json({
-//         error:
-//           "reg_no, meal_type, taste, hygiene, quantity and want_change  are required",
-//       });
-//     }
-
-//     const query = `INSERT INTO feedback (reg_no, meal_type, taste_rating, hygiene_rating, quantity_rating, want_change, comments, feedback_date) 
-//                    VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE())`;
-
-//     await db.execute(query, [
-//       reg_no,
-//       meal_type,
-//       taste,
-//       hygiene,
-//       quantity,
-//       want_change,
-//       comments,
-//     ]);
-
-//     res.status(201).json({ message: "Feedback submitted successfully!" });
-//   } catch (error) {
-//     console.error("Error submitting feedback:", error);
-//     res.status(500).json({ error: "Server error" });
-//   }
-// };
 
 module.exports.displayNegativeFeedbacks = async (req, res) => {
   try{
