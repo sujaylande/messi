@@ -10,3 +10,5 @@ server/student-service/.env
 server/student-service/scripts
 server/manager-service/scripts
 server/test
+server/script-service/.env
+scripts_backup

@@ -110,49 +110,6 @@ const MessStatistics = () => {
     fetchStudents(filter)
   }, [filter])
 
-  // const fetchStudents = (status) => {
-  //   setIsLoading(true)
-  //   fetch(`http://localhost:5000/api/manager/students-status-list?status=${status}`)
-  //     .then((res) => {
-  //       if (!res.ok) {
-  //         throw new Error("Network response was not ok")
-  //       }
-  //       return res.json()
-  //     })
-  //     .then((data) => {
-  //       setStudents(data)
-  //       setIsLoading(false)
-  //     })
-  //     .catch((err) => {
-  //       console.error("Error fetching data:", err)
-  //       setError("Failed to load student data. Please try again.")
-  //       setIsLoading(false)
-  //     })
-  // }
-
-  // useEffect(() => {
-  //   setIsLoading(true)
-
-  //   // Fetch mess statistics
-  //   fetch("http://localhost:5000/api/manager/mess-stat")
-  //     .then((res) => {
-  //       if (!res.ok) {
-  //         throw new Error("Network response was not ok")
-  //       }
-  //       return res.json()
-  //     })
-  //     .then((data) => {
-  //       setData(data)
-  //       setIsLoading(false)
-  //     })
-  //     .catch((err) => {
-  //       console.error("Error fetching data:", err)
-  //       setError("Failed to load mess statistics. Please try again.")
-  //       setIsLoading(false)
-  //     })
-
-  //   fetchStudents(filter)
-  // }, [filter])
 
   // Calculate meal trends (increase/decrease from previous day)
   const calculateTrend = (index, mealType) => {
@@ -166,37 +123,8 @@ const MessStatistics = () => {
     return "same"
   }
 
-  // Function to export table data as CSV
-  const exportToCSV = (tableData, filename) => {
-    if (tableData.length === 0) return
+  // // Function to export table data as CSV
 
-    // Get headers from first object
-    const headers = Object.keys(tableData[0])
-
-    // Convert data to CSV format
-    const csvRows = []
-    csvRows.push(headers.join(","))
-
-    for (const row of tableData) {
-      const values = headers.map((header) => {
-        const value = row[header]
-        return `"${value}"`
-      })
-      csvRows.push(values.join(","))
-    }
-
-    // Create and download CSV file
-    const csvString = csvRows.join("\n")
-    const blob = new Blob([csvString], { type: "text/csv" })
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.setAttribute("hidden", "")
-    a.setAttribute("href", url)
-    a.setAttribute("download", `${filename}.csv`)
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-  }
 
   // Get today's date in a readable format
   const today = new Date().toLocaleDateString("en-US", {
@@ -246,7 +174,7 @@ const MessStatistics = () => {
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-1">
               <Link
-                to="/"
+                to="/homepage"
                 className="flex items-center text-gray-700 hover:bg-blue-50 hover:text-blue-700 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 <Home className="mr-1 h-4 w-4" />
@@ -346,15 +274,7 @@ const MessStatistics = () => {
             <h1 className="text-2xl font-bold text-gray-900">Mess Statistics</h1>
             <p className="text-sm text-gray-500">{today}</p>
           </div>
-          <div className="mt-4 md:mt-0 flex space-x-3">
-            <button
-              onClick={() => exportToCSV(data, "mess-statistics")}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
-            >
-              <Download className="mr-2 h-4 w-4" />
-              Export Data
-            </button>
-          </div>
+
         </div>
 
         {isLoading ? (

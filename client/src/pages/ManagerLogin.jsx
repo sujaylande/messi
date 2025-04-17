@@ -76,7 +76,7 @@ const ManagerLogin = () => {
 
         </form>
         <Link
-                to="/student/login"
+                to="/"
                 className="text-green-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
               >
                 Student Login?

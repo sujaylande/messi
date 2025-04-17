@@ -48,21 +48,21 @@ function StudentPublic() {
   const [feedbackSuccess, setFeedbackSuccess] = useState(false);
 
   // Function to get student data from localStorage if not in context
-  const getStudentFromStorage = () => {
-    try {
-      // Try to get student data from localStorage if it exists
-      const storedStudent = localStorage.getItem("student-data");
-      if (storedStudent) {
-        const parsedStudent = JSON.parse(storedStudent);
-        // console.log("Found student in localStorage:", parsedStudent);
-        setStudent(parsedStudent); // Update the context
-        return parsedStudent;
-      }
-    } catch (error) {
-      console.error("Error getting student from storage:", error);
-    }
-    return null;
-  };  
+  // const getStudentFromStorage = () => {
+  //   try {
+  //     // Try to get student data from localStorage if it exists
+  //     const storedStudent = localStorage.getItem("student-data");
+  //     if (storedStudent) {
+  //       const parsedStudent = JSON.parse(storedStudent);
+  //       // console.log("Found student in localStorage:", parsedStudent);
+  //       setStudent(parsedStudent); // Update the context
+  //       return parsedStudent;
+  //     }
+  //   } catch (error) {
+  //     console.error("Error getting student from storage:", error);
+  //   }
+  //   return null;
+  // };  
   
     const handleLogout = async () => {
       try {

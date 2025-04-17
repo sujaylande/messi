@@ -30,6 +30,8 @@ async function connectRabbitMQ() {
     channel = await connection.createChannel();
 
     await channel.assertQueue("feedback_queue"); // Listening for feedback
+    await channel.assertQueue("register_student_queue"); // Listening for feedback
+
     console.log("🐇 Manager connected to RabbitMQ!");
 
     // Listening for feedback submissions
@@ -59,6 +61,25 @@ async function connectRabbitMQ() {
           (err) => {
             if (err) console.error("Error inserting feedback in Manager DB:", err.message);
             else console.log("✅ Feedback stored in Manager Database.");
+          }
+        );
+
+        channel.ack(msg);
+      }
+    });
+
+    channel.consume("register_student_queue", async (msg) => {
+      if (msg !== null) {
+        const registrationData = JSON.parse(msg.content.toString());
+
+        console.log(registrationData);
+
+        db.query(
+          "INSERT INTO students (name, email, reg_no, roll_no, password, block_no) VALUES (?, ?, ?, ?, ?, ?)",
+          [registrationData.name, registrationData.email, registrationData.reg_no, registrationData.roll_no, registrationData.password, registrationData.block_no],
+          (err) => {
+            if (err) console.error("Error inserting student:", err.message);
+            else console.log("✅ student saved in manager Database.");
           }
         );
 

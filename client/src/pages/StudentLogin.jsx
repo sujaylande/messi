@@ -29,6 +29,8 @@ const StudentLogin = () => {
 
       setStudent(data.student)
 
+      console.log("login", data.student);
+
       // localStorage.setItem('student-token', data.token)
       navigate('/student-public')
 

@@ -12,6 +12,7 @@ const jwt = require("jsonwebtoken");
 const util = require("util");
 const { getCurrentMeal } = require('../utils/mealHelper.js'); // assuming you have this function elsewhere
 const { error } = require("console");
+const axios = require("axios")
 
 
 const query = util.promisify(db.query).bind(db);
@@ -173,65 +174,65 @@ module.exports.managerLogin = (req, res) => {
   });
 };
 
-module.exports.register = async (req, res) => {
-  try {
-    const { name, email, reg_no, roll_no, password } = req.body;
-    const block_no = req.manager.block_no;
+// module.exports.register = async (req, res) => {
+//   try {
+//     const { name, email, reg_no, roll_no, password } = req.body;
+//     const block_no = req.manager.block_no;
 
-    if (!name || !email || !reg_no || !roll_no || !password) {
-      return res
-        .status(400)
-        .json({ error: "Name, email, reg_no, roll_no, and password are required" });
-    }
+//     if (!name || !email || !reg_no || !roll_no || !password) {
+//       return res
+//         .status(400)
+//         .json({ error: "Name, email, reg_no, roll_no, and password are required" });
+//     }
 
-    const result = await query(
-      "SELECT * FROM students WHERE block_no = ? AND (email = ? OR roll_no = ? OR reg_no = ?)",
-      [block_no, email, roll_no, reg_no]
-    );
+//     const result = await query(
+//       "SELECT * FROM students WHERE block_no = ? AND (email = ? OR roll_no = ? OR reg_no = ?)",
+//       [block_no, email, roll_no, reg_no]
+//     );
 
-    if (result.length) {
-      return res.status(400).json({ error: "Student with this email, roll number, or registration number already exists in this block" });
-    }
+//     if (result.length) {
+//       return res.status(400).json({ error: "Student with this email, roll number, or registration number already exists in this block" });
+//     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+//     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const scriptPath = path.join(__dirname, "..", "scripts", "python", "add_faces.py");
+//     const scriptPath = path.join(__dirname, "..", "scripts", "python", "add_faces.py");
 
-    const python = spawn("python", [
-      scriptPath,
-      name,
-      email,
-      reg_no,
-      roll_no,
-      hashedPassword,
-      block_no
-    ]);
+//     const python = spawn("python", [
+//       scriptPath,
+//       name,
+//       email,
+//       reg_no,
+//       roll_no,
+//       hashedPassword,
+//       block_no
+//     ]);
 
-    let output = "";
-    let error = "";
+//     let output = "";
+//     let error = "";
 
-    python.stdout.on("data", (data) => {
-      output += data.toString();
-    });
+//     python.stdout.on("data", (data) => {
+//       output += data.toString();
+//     });
 
-    python.stderr.on("data", (data) => {
-      error += data.toString();
-    });
+//     python.stderr.on("data", (data) => {
+//       error += data.toString();
+//     });
 
-    python.on("close", (code) => {
-      console.log(`Python script exited with code ${code}`);
-      if (code !== 0) {
-        return res.status(500).json({ error: "Python script error", details: error });
-      }
-    });
+//     python.on("close", (code) => {
+//       console.log(`Python script exited with code ${code}`);
+//       if (code !== 0) {
+//         return res.status(500).json({ error: "Python script error", details: error });
+//       }
+//     });
 
-    res.status(201).json({ message: "Registration process started in background!" });
+//     res.status(201).json({ message: "Registration process started in background!" });
 
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
 
 
 module.exports.scan = (req, res) => {
@@ -279,6 +280,86 @@ module.exports.scan = (req, res) => {
   }
 };
 
+
+module.exports.register = async (req, res) => {
+  try {
+    const { name, email, reg_no, roll_no, password } = req.body;
+    const block_no = req?.manager?.block_no || 1;
+
+    if (!name || !email || !reg_no || !roll_no || !password) {
+      return res.status(400).json({
+        error: "Name, email, reg_no, roll_no, and password are required"
+      });
+    }
+
+    const result = await query(
+      "SELECT * FROM students WHERE block_no = ? AND (email = ? OR roll_no = ? OR reg_no = ?)",
+      [block_no, email, roll_no, reg_no]
+    );
+
+    if (result.length) {
+      return res.status(400).json({
+        error: "Student with this email, roll number, or registration number already exists in this block"
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // ✅ Call FastAPI to start background face registration
+    await axios.post("http://localhost:8000/register", {
+      name,
+      email,
+      reg_no,
+      roll_no,
+      password: hashedPassword,
+      block_no
+    });
+
+    // ✅ Don’t wait for FastAPI to complete processing
+    return res.status(201).json({
+      message: "Student registered. Face registration started in background."
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// module.exports.scan = async (req, res) => {
+//   try {
+//     const block_no = req.manager.block_no;
+
+//     const checkQuery = `SELECT * FROM students WHERE block_no = ?;`;
+//     db.query(checkQuery, [block_no], async (err, result) => {
+//       if (err) {
+//         console.error("Database Error:", err);
+//         return res.status(500).json({ error: "Internal Server Error" });
+//       }
+
+//       if (result.length === 0) {
+//         return res.status(404).json({ error: "No student found" });
+//       }
+
+//       try {
+//         const response = await axios.post("http://localhost:8000/attendance", {
+//           block_no: block_no
+//         });
+
+//         return res.status(200).json({
+//           message: "Attendance processing started.",
+//           data: response.data
+//         });
+//       } catch (apiErr) {
+//         console.error("FastAPI Error:", apiErr.response?.data || apiErr.message);
+//         return res.status(500).json({ error: "Failed to call attendance service" });
+//       }
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
 
 module.exports.messStatistics = (req, res) => {
   try {
@@ -717,13 +798,13 @@ module.exports.displayMenu = (req, res) => {
 
 module.exports.displayNegativeFeedbacks = async (req, res) => {
   try{
-    const cachedData = cache.get("negative_comments");
+    // const cachedData = cache.get("negative_comments");
     const block_no = req.manager.block_no;
 
-    if (cachedData) {
-      // console.log("negative_comments form node-cache...");
-      return res.json(cachedData);
-    }
+    // if (cachedData) {
+    //   // console.log("negative_comments form node-cache...");
+    //   return res.json(cachedData);
+    // }
 
     const scriptPath = path.resolve(__dirname, "..", "scripts", "python", "feedback_analyzer.py");
     const pythonProcess = spawn("python", [scriptPath, block_no]);

@@ -61,12 +61,14 @@ async function connectRabbitMQ() {
       if (msg !== null) {
         const attendanceData = JSON.parse(msg.content.toString());
 
+        console.log(attendanceData)
+
         db.query(
           "INSERT INTO attendance (reg_no, date, meal_slot, meal_cost, block_no, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
           [attendanceData.reg_no, attendanceData.date, attendanceData.meal_slot, attendanceData.meal_cost, attendanceData.block_no, attendanceData.timestamp],
           (err) => {
             if (err) console.error("Error inserting attendance:", err.message);
-            // else console.log("✅ attendance saved in Student Database.");
+            else console.log("✅ attendance saved in Student Database.");
           }
         );
 
@@ -79,14 +81,14 @@ async function connectRabbitMQ() {
       if (msg !== null) {
         const registrationData = JSON.parse(msg.content.toString());
 
-        // console.log(registrationData);
+        console.log(registrationData);
 
         db.query(
           "INSERT INTO students (name, email, reg_no, roll_no, password, block_no) VALUES (?, ?, ?, ?, ?, ?)",
           [registrationData.name, registrationData.email, registrationData.reg_no, registrationData.roll_no, registrationData.password, registrationData.block_no],
           (err) => {
             if (err) console.error("Error inserting student:", err.message);
-            // else console.log("✅ student saved in Student Database.");
+            else console.log("✅ student saved in Student Database.");
           }
         );
 
