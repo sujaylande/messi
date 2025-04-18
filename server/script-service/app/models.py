@@ -6,8 +6,8 @@ class RegisterStudent(BaseModel):
     email: str
     reg_no: str
     roll_no: str
-    block_no: str
     password: str
+    block_no: str
 
 class AttendanceRequest(BaseModel):
-    embedding: list[float]
+    block_no: str

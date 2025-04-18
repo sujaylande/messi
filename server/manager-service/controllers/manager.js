@@ -235,56 +235,56 @@ module.exports.managerLogin = (req, res) => {
 // };
 
 
-module.exports.scan = (req, res) => {
-  try {
-    const block_no = req.manager.block_no;
+// module.exports.scan = (req, res) => {
+//   try {
+//     const block_no = req.manager.block_no;
 
-    const checkQuery = `SELECT * FROM students WHERE block_no = ?;`;
-    db.query(checkQuery,[block_no], (err, result) => {
-      if (err) {
-        console.error("Database Error:", err);
-        return res.status(500).json({ error: "Internal Server Error" });
-      }
+//     const checkQuery = `SELECT * FROM students WHERE block_no = ?;`;
+//     db.query(checkQuery,[block_no], (err, result) => {
+//       if (err) {
+//         console.error("Database Error:", err);
+//         return res.status(500).json({ error: "Internal Server Error" });
+//       }
 
-      if (result.length === 0) {
-        return res.status(404).json({ error: "No student found" });
-      }
+//       if (result.length === 0) {
+//         return res.status(404).json({ error: "No student found" });
+//       }
 
-      const scriptPath = path.join(
-        __dirname,
-        "..", // Go up one level from controllers
-        "scripts",
-        "python",
-        "test.py"
-      );
+//       const scriptPath = path.join(
+//         __dirname,
+//         "..", // Go up one level from controllers
+//         "scripts",
+//         "python",
+//         "test.py"
+//       );
 
-      const python = spawn("python", [scriptPath]);
+//       const python = spawn("python", [scriptPath]);
 
-      python.stdout.on("data", (data) => {
-        console.log(data.toString());
-      });
-      python.stderr.on("data", (data) => {
-        console.error(data.toString());
-      });
-      python.on("close", (code) => {
-        console.log(`Python script exited with code ${code}`);
-      });
+//       python.stdout.on("data", (data) => {
+//         console.log(data.toString());
+//       });
+//       python.stderr.on("data", (data) => {
+//         console.error(data.toString());
+//       });
+//       python.on("close", (code) => {
+//         console.log(`Python script exited with code ${code}`);
+//       });
 
-      res
-        .status(200)
-        .json({ message: "Scaning process started in background!" });
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
+//       res
+//         .status(200)
+//         .json({ message: "Scaning process started in background!" });
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
 
 
 module.exports.register = async (req, res) => {
   try {
     const { name, email, reg_no, roll_no, password } = req.body;
-    const block_no = req?.manager?.block_no || 1;
+    const block_no = req?.manager?.block_no || 10;
 
     if (!name || !email || !reg_no || !roll_no || !password) {
       return res.status(400).json({
@@ -312,8 +312,15 @@ module.exports.register = async (req, res) => {
       reg_no,
       roll_no,
       password: hashedPassword,
-      block_no
+      block_no: String(block_no)
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
+
+    console.log("iam not wating")
+    
 
     // ✅ Don’t wait for FastAPI to complete processing
     return res.status(201).json({
@@ -326,40 +333,45 @@ module.exports.register = async (req, res) => {
   }
 };
 
-// module.exports.scan = async (req, res) => {
-//   try {
-//     const block_no = req.manager.block_no;
+module.exports.scan = async (req, res) => {
+  try {
+    const block_no = req.manager.block_no;
 
-//     const checkQuery = `SELECT * FROM students WHERE block_no = ?;`;
-//     db.query(checkQuery, [block_no], async (err, result) => {
-//       if (err) {
-//         console.error("Database Error:", err);
-//         return res.status(500).json({ error: "Internal Server Error" });
-//       }
+    const checkQuery = `SELECT * FROM students WHERE block_no = ?;`;
+    db.query(checkQuery, [block_no], async (err, result) => {
+      if (err) {
+        console.error("Database Error:", err);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
 
-//       if (result.length === 0) {
-//         return res.status(404).json({ error: "No student found" });
-//       }
+      if (result.length === 0) {
+        return res.status(404).json({ error: "No student found" });
+      }
 
-//       try {
-//         const response = await axios.post("http://localhost:8000/attendance", {
-//           block_no: block_no
-//         });
+      try {
+        const response = await axios.post("http://localhost:8000/attendance", {
+          block_no: String(block_no)
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
 
-//         return res.status(200).json({
-//           message: "Attendance processing started.",
-//           data: response.data
-//         });
-//       } catch (apiErr) {
-//         console.error("FastAPI Error:", apiErr.response?.data || apiErr.message);
-//         return res.status(500).json({ error: "Failed to call attendance service" });
-//       }
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// };
+        return res.status(200).json({
+          message: "Attendance processing started.",
+          data: response.data
+        });
+      } catch (apiErr) {
+        console.log(apiErr);
+        console.error("FastAPI Error:", apiErr.response?.data || apiErr.message);
+        return res.status(500).json({ error: "Failed to call attendance service" });
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 module.exports.messStatistics = (req, res) => {
   try {

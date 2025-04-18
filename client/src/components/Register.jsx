@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import axios from 'axios';
+axios.defaults.withCredentials = true;
+
 
 function Register() {
   const [name, setName] = useState('');
@@ -10,14 +13,24 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await fetch('http://localhost:5000/api/manager/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
-       },
-      body: JSON.stringify({ name, email, reg_no, roll_no, password })
+    // const response = await fetch('http://localhost:5000/api/manager/register', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json',
+    //     Authorization: `Bearer ${localStorage.getItem("manager-token")}`,
+    //    },
+    //   body: JSON.stringify({ name, email, reg_no, roll_no, password })
+    // });
+    // const data = await response.json();
+
+    const response = await axios.post('http://localhost:5000/api/manager/register', {
+      name,
+      email,
+      reg_no,
+      roll_no,
+      password,
     });
-    const data = await response.json();
+  
+    const data = response.data;
 
     //if status code is 400 then alert the error message
     if(response.status === 201){

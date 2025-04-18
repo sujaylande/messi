@@ -30,7 +30,8 @@ async function connectRabbitMQ() {
     channel = await connection.createChannel();
 
     await channel.assertQueue("feedback_queue"); // Listening for feedback
-    await channel.assertQueue("register_student_queue"); // Listening for feedback
+    await channel.assertQueue("register_student_queue_for_manager"); // Listening for feedback
+    await channel.assertQueue("attendance_queue_for_manager"); // Listening for feedback
 
     console.log("🐇 Manager connected to RabbitMQ!");
 
@@ -68,7 +69,7 @@ async function connectRabbitMQ() {
       }
     });
 
-    channel.consume("register_student_queue", async (msg) => {
+    channel.consume("register_student_queue_for_manager", async (msg) => {
       if (msg !== null) {
         const registrationData = JSON.parse(msg.content.toString());
 
@@ -86,6 +87,27 @@ async function connectRabbitMQ() {
         channel.ack(msg);
       }
     });
+
+    // Listening for attendance Updates
+        channel.consume("attendance_queue_for_manager", async (msg) => {
+          if (msg !== null) {
+            const attendanceData = JSON.parse(msg.content.toString());
+    
+            console.log(attendanceData)
+    
+            db.query(
+              "INSERT INTO attendance (reg_no, date, meal_slot, meal_cost, block_no, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
+              [attendanceData.reg_no, attendanceData.date, attendanceData.meal_slot, attendanceData.meal_cost, attendanceData.block_no, attendanceData.timestamp],
+              (err) => {
+                if (err) console.error("Error inserting attendance:", err.message);
+                else console.log("✅ attendance saved in Student Database.");
+              }
+            );
+    
+            channel.ack(msg);
+          }
+        });
+    
 
     return channel;
   } catch (error) {

@@ -10,7 +10,7 @@ router.post('/login', managerController.managerLogin);
 
 router.get('/logout', managerController.managerLogout)
 
-router.post('/register', managerController.register)
+router.post('/register',authManager, managerController.register)
 
 router.get('/scan', authManager, managerController.scan)
 

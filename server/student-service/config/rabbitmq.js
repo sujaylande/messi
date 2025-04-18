@@ -11,8 +11,8 @@ async function connectRabbitMQ() {
     await channel.assertQueue("notice_queue");
     await channel.assertQueue("menu_queue");
     await channel.assertQueue("feedback_queue"); // New queue for feedback
-    await channel.assertQueue("attendance_queue");
-    await channel.assertQueue("register_student_queue");
+    await channel.assertQueue("attendance_queue_for_student");
+    await channel.assertQueue("register_student_queue_for_student");
     await channel.assertQueue("delete_student_queue");
     await channel.assertQueue("remove_notice_queue");
 
@@ -57,7 +57,7 @@ async function connectRabbitMQ() {
     });
 
     // Listening for attendance Updates
-    channel.consume("attendance_queue", async (msg) => {
+    channel.consume("attendance_queue_for_student", async (msg) => {
       if (msg !== null) {
         const attendanceData = JSON.parse(msg.content.toString());
 
@@ -77,24 +77,24 @@ async function connectRabbitMQ() {
     });
 
      // Listening for attendance Updates
-     channel.consume("register_student_queue", async (msg) => {
-      if (msg !== null) {
-        const registrationData = JSON.parse(msg.content.toString());
-
-        console.log(registrationData);
-
-        db.query(
-          "INSERT INTO students (name, email, reg_no, roll_no, password, block_no) VALUES (?, ?, ?, ?, ?, ?)",
-          [registrationData.name, registrationData.email, registrationData.reg_no, registrationData.roll_no, registrationData.password, registrationData.block_no],
-          (err) => {
-            if (err) console.error("Error inserting student:", err.message);
-            else console.log("✅ student saved in Student Database.");
-          }
-        );
-
-        channel.ack(msg);
-      }
-    });
+     channel.consume("register_student_queue_for_student", async (msg) => {
+           if (msg !== null) {
+             const registrationData = JSON.parse(msg.content.toString());
+     
+             console.log(registrationData);
+     
+             db.query(
+               "INSERT INTO students (name, email, reg_no, roll_no, password, block_no) VALUES (?, ?, ?, ?, ?, ?)",
+               [registrationData.name, registrationData.email, registrationData.reg_no, registrationData.roll_no, registrationData.password, registrationData.block_no],
+               (err) => {
+                 if (err) console.error("Error inserting student:", err.message);
+                 else console.log("✅ student saved in student Database.");
+               }
+             );
+     
+             channel.ack(msg);
+           }
+         });
 
     channel.consume("delete_student_queue", async (msg) => {
       if (msg !== null) {

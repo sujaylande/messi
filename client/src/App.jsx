@@ -13,9 +13,6 @@ import ManagerProtectWrapper from './pages/ManagerProtectWrapper'
 import StudentProtectWrapper from './pages/StudentProtectWrapper'
 import StudentLogin from "./pages/StudentLogin"
 
-
-
-
 function App() {
   return (
     <Router>
