@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 from app.db_utils import get_db_connection
+import threading
 
 
 amqp_url = os.getenv("AMQP_URL")
@@ -65,54 +66,108 @@ def send_registration_Status_toManager(payload):
     )
 
 
-# Declare the queue for feedback
-channel.queue_declare(queue='feedback_queue_for_scipt_service', durable=True)
+# # Declare the queue for feedback
+# channel.queue_declare(queue='feedback_queue_for_scipt_service', durable=True)
 
-# Callback for feedback_queue_for_scipt_service
-def feedback_callback(ch, method, properties, body):
-    try:
-        data = json.loads(body.decode())
-        # print("📥 Received feedback in script service:", data)
+# # Callback for feedback_queue_for_scipt_service
+# def feedback_callback(ch, method, properties, body):
+#     try:
+#         data = json.loads(body.decode())
+#         # print("📥 Received feedback in script service:", data)
 
-        conn = get_db_connection()
-        cursor = conn.cursor()
+#         conn = get_db_connection()
+#         cursor = conn.cursor()
 
-        insert_query = """
-            INSERT INTO feedback (
-                reg_no, block_no, meal_type,
-                taste_rating, hygiene_rating, quantity_rating,
-                want_change, comments, feedback_date
+#         insert_query = """
+#             INSERT INTO feedback (
+#                 reg_no, block_no, meal_type,
+#                 taste_rating, hygiene_rating, quantity_rating,
+#                 want_change, comments, feedback_date
+#             )
+#             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, CURDATE())
+#         """
+
+#         cursor.execute(insert_query, (
+#             data['reg_no'],
+#             data['block_no'],
+#             data['meal_type'],
+#             data['taste'],
+#             data['hygiene'],
+#             data['quantity'],
+#             data.get('want_change', ''),
+#             data.get('comments', '')
+#         ))
+
+#         conn.commit()
+#         cursor.close()
+#         conn.close()
+
+#         # print("✅ Stored feedback to script DB.")
+#         ch.basic_ack(delivery_tag=method.delivery_tag)
+
+#     except Exception as e:
+#         print("❌ Error processing feedback:", str(e))
+#         # Optional: ch.basic_nack(delivery_tag=method.delivery_tag)
+
+# # Start consuming messages in background (non-blocking if needed)
+# channel.basic_consume(
+#     queue='feedback_queue_for_scipt_service',
+#     on_message_callback=feedback_callback
+# )
+
+# # print("[*] Waiting for feedback messages in 'feedback_queue_for_scipt_service'. To exit press CTRL+C")
+# channel.start_consuming()
+
+def start_feedback_consumer():
+    def feedback_callback(ch, method, properties, body):
+        try:
+            data = json.loads(body.decode())
+            print("📥 Received feedback in script service:", data)
+
+            conn = get_db_connection()
+            cursor = conn.cursor()
+
+            insert_query = """
+                INSERT INTO feedback (
+                    reg_no, block_no, meal_type,
+                    taste_rating, hygiene_rating, quantity_rating,
+                    want_change, comments, feedback_date
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, CURDATE())
+            """
+
+            cursor.execute(insert_query, (
+                data['reg_no'],
+                data['block_no'],
+                data['meal_type'],
+                data['taste'],
+                data['hygiene'],
+                data['quantity'],
+                data.get('want_change', ''),
+                data.get('comments', '')
+            ))
+
+            conn.commit()
+            cursor.close()
+            conn.close()
+
+            print("✅ Stored feedback to script DB.")
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+
+        except Exception as e:
+            print("❌ Error processing feedback:", str(e))
+
+    def run():
+        try:
+            channel.queue_declare(queue='feedback_queue_for_scipt_service', durable=True)
+            channel.basic_consume(
+                queue='feedback_queue_for_scipt_service',
+                on_message_callback=feedback_callback
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, CURDATE())
-        """
+            print("🚀 RabbitMQ consumer started in background thread")
+            channel.start_consuming()
+        except Exception as e:
+            print("❌ Consumer thread error:", e)
 
-        cursor.execute(insert_query, (
-            data['reg_no'],
-            data['block_no'],
-            data['meal_type'],
-            data['taste'],
-            data['hygiene'],
-            data['quantity'],
-            data.get('want_change', ''),
-            data.get('comments', '')
-        ))
-
-        conn.commit()
-        cursor.close()
-        conn.close()
-
-        # print("✅ Stored feedback to script DB.")
-        ch.basic_ack(delivery_tag=method.delivery_tag)
-
-    except Exception as e:
-        print("❌ Error processing feedback:", str(e))
-        # Optional: ch.basic_nack(delivery_tag=method.delivery_tag)
-
-# Start consuming messages in background (non-blocking if needed)
-channel.basic_consume(
-    queue='feedback_queue_for_scipt_service',
-    on_message_callback=feedback_callback
-)
-
-# print("[*] Waiting for feedback messages in 'feedback_queue_for_scipt_service'. To exit press CTRL+C")
-channel.start_consuming()
+    thread = threading.Thread(target=run, daemon=True)
+    thread.start()
