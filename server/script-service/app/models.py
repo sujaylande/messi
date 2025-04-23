@@ -11,3 +11,5 @@ class RegisterStudent(BaseModel):
 
 class AttendanceRequest(BaseModel):
     block_no: str
+
+

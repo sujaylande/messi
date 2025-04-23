@@ -15,6 +15,11 @@ from fastapi import Query
 from nltk.sentiment import SentimentIntensityAnalyzer
 import nltk
 
+import pandas as pd
+import numpy as np
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
+from datetime import date
+
 # Download NLTK resources
 nltk.download('vader_lexicon')
 
@@ -67,6 +72,51 @@ async def register_student(data: RegisterStudent, background_tasks: BackgroundTa
         logger.error(f"Error during registration: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error during registration")
     
+
+@app.get("/forecast/{block_no}")
+def forecast_attendance(block_no: int):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        query = """
+            SELECT date, meal_slot, COUNT(*) as count 
+            FROM attendance 
+            WHERE block_no = %s
+            GROUP BY date, meal_slot
+        """
+        cursor.execute(query, (block_no,))
+        rows = cursor.fetchall()
+        conn.close()
+        cursor.close()
+
+        if not rows:
+            return []
+
+        df = pd.DataFrame(rows)
+        df['date'] = pd.to_datetime(df['date'])
+        df.set_index('date', inplace=True)
+
+        pivot_df = df.pivot_table(index='date', columns='meal_slot', values='count', aggfunc='sum').fillna(0)
+        pivot_df = pivot_df.asfreq('D', fill_value=0)
+
+        forecast_data = {}
+        for meal in pivot_df.columns:
+            if pivot_df[meal].count() < 2:
+                forecast_data[meal] = []
+                continue
+
+            try:
+                model = ExponentialSmoothing(pivot_df[meal], trend="add", seasonal=None).fit()
+                future_forecast = model.forecast(7)
+                forecast_data[meal] = future_forecast.tolist()
+            except Exception as e:
+                forecast_data[meal] = []
+
+        return forecast_data
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 
 @app.post("/attendance")

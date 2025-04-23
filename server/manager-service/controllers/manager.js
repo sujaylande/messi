@@ -489,66 +489,85 @@ module.exports.todaysAttendance = (req, res) => {
   });
 };
 
-module.exports.attendanceProbability = (req, res) => {
+// module.exports.attendanceProbability = (req, res) => {
 
-  const cachedData = cache.get("attendance-probability");
+//   const cachedData = cache.get("attendance-probability");
+//   const block_no = req.manager.block_no;
+
+//   if (cachedData) {
+//     // console.log("attendance-probability form node-cache...");
+//     return res.json(cachedData);
+//   }
+
+//   const query = `
+//     SELECT date, meal_slot, COUNT(*) as count 
+//     FROM attendance 
+//     WHERE block_no = ?
+//     GROUP BY date, meal_slot
+//   `;
+
+//   db.query(query,[block_no], (err, results) => {
+//     if (err) {
+//       console.error("Database query error:", err);
+//       return res.status(500).json({ error: "Internal server error" });
+//     }
+
+//     if (results.length === 0) {
+//       return res.status(200).json([]);
+//     }
+
+//     const scriptPath = path.join(__dirname,"../", "scripts", "python", "forecast.py");
+
+//     const pythonProcess = spawn("python", [
+//       scriptPath,
+//       JSON.stringify(results),
+//     ]);
+
+//     let dataChunks = "";
+
+//     pythonProcess.stdout.on("data", (data) => {
+//       dataChunks += data.toString();
+//     });
+
+//     pythonProcess.stderr.on("data", (data) => {
+//       console.error("Python Error:", data.toString());
+//     });
+
+//     pythonProcess.on("close", (code) => {
+//       if (code === 0) {
+//         try {
+//           const forecastData = JSON.parse(dataChunks);
+//           cache.set("attendance-probability", forecastData);
+//           res.status(200).json(forecastData);
+//         } catch (error) {
+//           console.error("JSON Parsing Error:", error);
+//           res.status(500).json({ error: "Failed to parse forecast data" });
+//         }
+//       } else {
+//         res.status(500).json({ error: "Python script execution failed" });
+//       }
+//     });
+//   });
+// };
+
+module.exports.attendanceProbability = async (req, res) => {
+  // const cachedData = cache.get("attendance-probability");
   const block_no = req.manager.block_no;
 
-  if (cachedData) {
-    // console.log("attendance-probability form node-cache...");
-    return res.json(cachedData);
+  // if (cachedData) {
+  //   return res.json(cachedData);
+  // }
+
+  try {
+    const response = await axios.get(`http://localhost:8000/forecast/${block_no}`);
+    cache.set("attendance-probability", response.data);
+    res.json(response.data);
+  } catch (err) {
+    console.error("Error calling FastAPI:", err.message);
+    res.status(500).json({ error: "Failed to get forecast data" });
   }
-
-  const query = `
-    SELECT date, meal_slot, COUNT(*) as count 
-    FROM attendance 
-    WHERE block_no = ?
-    GROUP BY date, meal_slot
-  `;
-
-  db.query(query,[block_no], (err, results) => {
-    if (err) {
-      console.error("Database query error:", err);
-      return res.status(500).json({ error: "Internal server error" });
-    }
-
-    if (results.length === 0) {
-      return res.status(200).json([]);
-    }
-
-    const scriptPath = path.join(__dirname,"../", "scripts", "python", "forecast.py");
-
-    const pythonProcess = spawn("python", [
-      scriptPath,
-      JSON.stringify(results),
-    ]);
-
-    let dataChunks = "";
-
-    pythonProcess.stdout.on("data", (data) => {
-      dataChunks += data.toString();
-    });
-
-    pythonProcess.stderr.on("data", (data) => {
-      console.error("Python Error:", data.toString());
-    });
-
-    pythonProcess.on("close", (code) => {
-      if (code === 0) {
-        try {
-          const forecastData = JSON.parse(dataChunks);
-          cache.set("attendance-probability", forecastData);
-          res.status(200).json(forecastData);
-        } catch (error) {
-          console.error("JSON Parsing Error:", error);
-          res.status(500).json({ error: "Failed to parse forecast data" });
-        }
-      } else {
-        res.status(500).json({ error: "Python script execution failed" });
-      }
-    });
-  });
 };
+
 
 module.exports.updateStudentStatus = (req, res) => {
   const { reg_no, status } = req.body;
