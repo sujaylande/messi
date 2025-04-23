@@ -35,10 +35,10 @@ def cosine_similarity(vec1, vec2):
 def get_current_meal():
     now = datetime.now().strftime("%H:%M")
     slots = {
-        "breakfast": ("08:00", "11:59", 50),
-        "lunch": ("12:00", "14:30", 100),
-        "snack": ("14:30", "18:00", 50),
-        "dinner": ("19:00", "23:00", 100)
+        "breakfast": ("09:08", "09:59", 50),
+        "lunch": ("10:00", "10:00", 100),
+        "snack": ("10:01", "11:00", 50),
+        "dinner": ("11:01", "12:00", 100)
     }
     for meal, (start, end, cost) in slots.items():
         if start <= now <= end:

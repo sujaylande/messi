@@ -808,44 +808,66 @@ module.exports.displayMenu = (req, res) => {
 };
 
 
+// module.exports.displayNegativeFeedbacks = async (req, res) => {
+//   try{
+//     const cachedData = cache.get("negative_comments");
+//     const block_no = req.manager.block_no;
+
+//     if (cachedData) {
+//       // console.log("negative_comments form node-cache...");
+//       return res.json(cachedData);
+//     }
+
+//     const scriptPath = path.resolve(__dirname, "..", "scripts", "python", "feedback_analyzer.py");
+//     const pythonProcess = spawn("python", [scriptPath, block_no]);
+
+//     let data = "";
+//     pythonProcess.stdout.on("data", (chunk) => {
+//       data += chunk.toString();
+//     });
+
+//     pythonProcess.on("close", (code) => {
+//       if (code === 0) {
+//         try {
+//           const jsonData = JSON.parse(data);
+//           cache.set("negative_comments", jsonData);
+//           res.json(jsonData);
+//         } catch (parseError) {
+//           res.status(500).json({ error: "Invalid JSON output from Python script" });
+//         }
+//       } else {
+//         res.status(500).json({ error: "Python script execution failed" });
+//       }
+//     });
+//   }
+//   catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+
+
 module.exports.displayNegativeFeedbacks = async (req, res) => {
-  try{
+  try {
     // const cachedData = cache.get("negative_comments");
     const block_no = req.manager.block_no;
 
     // if (cachedData) {
-    //   // console.log("negative_comments form node-cache...");
     //   return res.json(cachedData);
     // }
 
-    const scriptPath = path.resolve(__dirname, "..", "scripts", "python", "feedback_analyzer.py");
-    const pythonProcess = spawn("python", [scriptPath, block_no]);
+    const fastapiURL = `http://localhost:8000/feedback/negative?block_no=${block_no}`;
+    const response = await axios.get(fastapiURL);
 
-    let data = "";
-    pythonProcess.stdout.on("data", (chunk) => {
-      data += chunk.toString();
-    });
+    // console.log(response.data);
 
-    pythonProcess.on("close", (code) => {
-      if (code === 0) {
-        try {
-          const jsonData = JSON.parse(data);
-          cache.set("negative_comments", jsonData);
-          res.json(jsonData);
-        } catch (parseError) {
-          res.status(500).json({ error: "Invalid JSON output from Python script" });
-        }
-      } else {
-        res.status(500).json({ error: "Python script execution failed" });
-      }
-    });
-  }
-  catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    cache.set("negative_comments", response.data);
+    res.json(response.data);
+  } catch (err) {
+    console.error("Error calling FastAPI:", err.message);
+    res.status(500).json({ error: "Failed to fetch feedback from sentiment analyzer" });
   }
 };
-
 module.exports.feedbackStatistics = (req, res) => {
   const block_no = req.manager.block_no;
   const query = `

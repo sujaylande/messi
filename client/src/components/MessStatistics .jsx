@@ -290,7 +290,9 @@ const MessStatistics = () => {
           <>
             {/* Student Attendance Section */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+
               <div className="px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600">
+
                 <h2 className="text-xl font-bold text-white flex items-center">
                   <Users className="mr-2" />
                   Student Attendance
@@ -394,7 +396,9 @@ const MessStatistics = () => {
 
             {/* Student List Section */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
+
               <div className="px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600 flex flex-col md:flex-row md:items-center md:justify-between">
+                
                 <h2 className="text-xl font-bold text-white flex items-center">
                   <Users className="mr-2" />
                   Student List

@@ -21,6 +21,9 @@
 
 const amqp = require("amqplib");
 const db = require("./db");
+const { getIO } = require('../socket'); // import the getter
+
+
 
 let channel;
 
@@ -32,6 +35,7 @@ async function connectRabbitMQ() {
     await channel.assertQueue("feedback_queue"); // Listening for feedback
     await channel.assertQueue("register_student_queue_for_manager"); // Listening for feedback
     await channel.assertQueue("attendance_queue_for_manager"); // Listening for feedback
+    await channel.assertQueue("register_status_queue_for_manager"); // Listening for feedback
 
     console.log("🐇 Manager connected to RabbitMQ!");
 
@@ -84,6 +88,25 @@ async function connectRabbitMQ() {
           }
         );
 
+        channel.ack(msg);
+      }
+    });
+
+    channel.consume("register_status_queue_for_manager", async (msg) => {
+      if (msg !== null) {
+        const registrationData = JSON.parse(msg.content.toString());
+    
+        // console.log("Received from FastAPI:", registrationData);
+    
+        try {
+          const io = getIO();
+          // console.log("io", io)
+          io.emit("registration-status", registrationData);
+          // console.log("Emitted to frontend:", registrationData);
+        } catch (err) {
+          console.error("Socket.io not initialized yet", err);
+        }
+    
         channel.ack(msg);
       }
     });

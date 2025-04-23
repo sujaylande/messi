@@ -13,8 +13,11 @@ params.blocked_connection_timeout = 300
 connection = pika.BlockingConnection(params)
 channel = connection.channel()
 channel.queue_declare(queue='register_student_queue_for_manager', durable=True)
-channel.queue_declare(queue='attendance_queue', durable=True)
+channel.queue_declare(queue='attendance_queue_for_student', durable=True)
 channel.queue_declare(queue='register_student_queue_for_student', durable=True)
+channel.queue_declare(queue='attendance_queue_for_manager', durable=True)
+channel.queue_declare(queue='register_status_queue_for_manager', durable=True)
+
 
 def send_registration_event_toManager(payload):
     print("to manager")
@@ -34,7 +37,6 @@ def send_registration_event_toStudent(payload):
         properties=pika.BasicProperties(delivery_mode=2)
     )
 
-
 def send_attendance_event_toStudent(payload):
     channel.basic_publish(
         exchange='',
@@ -47,6 +49,15 @@ def send_attendance_event_toManager(payload):
     channel.basic_publish(
         exchange='',
         routing_key='attendance_queue_for_manager',
+        body=json.dumps(payload),
+        properties=pika.BasicProperties(delivery_mode=2)
+    )
+
+def send_registration_Status_toManager(payload):
+    print("to manager status")
+    channel.basic_publish(
+        exchange='',
+        routing_key='register_status_queue_for_manager',
         body=json.dumps(payload),
         properties=pika.BasicProperties(delivery_mode=2)
     )
