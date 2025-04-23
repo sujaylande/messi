@@ -639,6 +639,8 @@ module.exports.removeStudent = (req, res) => {
     const { reg_no } = req.params;
     const block_no = req.manager.block_no;
 
+    console.log(reg_no, block_no);
+
     if (!reg_no) {
       return res.status(400).json({ error: "Reg No is required" });
     }
@@ -654,42 +656,42 @@ module.exports.removeStudent = (req, res) => {
         return res.status(404).json({ error: "Student not found" });
       }
 
-      // const deleteAttendanceQuery = `DELETE FROM attendance WHERE reg_no = ? AND block_no = ?;`;
-      // db.query(deleteAttendanceQuery, [reg_no, block_no], (err) => {
-      //   if (err) {
-      //     console.error("Database Error:", err);
-      //     return res.status(500).json({ error: "Internal Server Error" });
-      //   }
+      const deleteQuery = `DELETE FROM students WHERE reg_no = ? AND block_no = ?;`;
+      db.query(deleteQuery, [reg_no, block_no], (err) => {
+        if (err) {
+          console.error("Database Error:", err);
+          return res.status(500).json({ error: "Internal Server Error" });
+        }
 
-        // Call the Python script
-        const scriptPath = path.join(
-          __dirname,
-          "..", // Go up one level from controllers
-          "scripts",
-          "python",
-          "remove_student.py"
-        );
+        // // Call the Python script
+        // const scriptPath = path.join(
+        //   __dirname,
+        //   "..", // Go up one level from controllers
+        //   "scripts",
+        //   "python",
+        //   "remove_student.py"
+        // );
 
-        const pythonProcess = spawn("python", [scriptPath, reg_no, block_no]);
+        // const pythonProcess = spawn("python", [scriptPath, reg_no, block_no]);
 
-        let dataChunks = "";
+        // let dataChunks = "";
 
-        pythonProcess.stdout.on("data", (data) => {
-          dataChunks += data.toString();
-        });
+        // pythonProcess.stdout.on("data", (data) => {
+        //   dataChunks += data.toString();
+        // });
 
-        pythonProcess.stderr.on("data", (data) => {
-          console.error("Python Error:", data.toString());
-        });
+        // pythonProcess.stderr.on("data", (data) => {
+        //   console.error("Python Error:", data.toString());
+        // });
 
-        pythonProcess.on("close", (code) => {
-              console.log(`Python script exited with code ${code}`);
-        });
+        // pythonProcess.on("close", (code) => {
+        //       console.log(`Python script exited with code ${code}`);
+        // });
 
-        res.status(200).json({ message: "Student removal process started!" });
+        res.status(200).json({ message: "Student removed successfully!" });
 
       });
-    // });
+    });
   }catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
@@ -887,6 +889,7 @@ module.exports.displayNegativeFeedbacks = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch feedback from sentiment analyzer" });
   }
 };
+
 module.exports.feedbackStatistics = (req, res) => {
   const block_no = req.manager.block_no;
   const query = `
