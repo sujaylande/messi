@@ -234,7 +234,15 @@ module.exports.feedbackForm = async (req, res) => {
     if (channel) {
       const feedbackData = { reg_no, block_no, meal_type, taste, hygiene, quantity, want_change, comments };
       channel.sendToQueue("feedback_queue", Buffer.from(JSON.stringify(feedbackData)));
-      // console.log("📤 Feedback sent to Manager Service!");
+      console.log("📤 Feedback sent to Manager Service!");
+    } else {
+      console.error("❌ Failed to publish feedback: RabbitMQ channel unavailable.");
+    }
+
+    if (channel) {
+      const feedbackData = { reg_no, block_no, meal_type, taste, hygiene, quantity, want_change, comments };
+      channel.sendToQueue("feedback_queue_for_scipt_service", Buffer.from(JSON.stringify(feedbackData)));
+      console.log("📤 Feedback sent to script Service!");
     } else {
       console.error("❌ Failed to publish feedback: RabbitMQ channel unavailable.");
     }

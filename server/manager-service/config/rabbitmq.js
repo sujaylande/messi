@@ -43,7 +43,7 @@ async function connectRabbitMQ() {
     channel.consume("feedback_queue", async (msg) => {
       if (msg !== null) {
         const feedbackData = JSON.parse(msg.content.toString());
-        // console.log("📥 Received feedback from Student Service:", feedbackData);
+        console.log("📥 Received feedback from Student Service:", feedbackData);
 
         // Insert feedback into Manager's database
         const query = `

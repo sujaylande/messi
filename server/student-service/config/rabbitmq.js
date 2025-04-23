@@ -10,13 +10,11 @@ async function connectRabbitMQ() {
     
     await channel.assertQueue("notice_queue");
     await channel.assertQueue("menu_queue");
-    await channel.assertQueue("feedback_queue"); // New queue for feedback
+    // await channel.assertQueue("feedback_queue"); // New queue for feedback
     await channel.assertQueue("attendance_queue_for_student");
     await channel.assertQueue("register_student_queue_for_student");
     await channel.assertQueue("delete_student_queue");
     await channel.assertQueue("remove_notice_queue");
-
-
 
     console.log("📌 Student connected to RabbitMQ...");
 
