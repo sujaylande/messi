@@ -1,6 +1,6 @@
 // Meal slots
 const MEAL_SLOTS = {
-    breakfast: { start: "09:10", end: "15:11", cost: 50 },
+    breakfast: { start: "09:10", end: "11:11", cost: 50 },
     lunch:     { start: "15:12", end: "15:30", cost: 100 },
     snack:     { start: "14:31", end: "15:00", cost: 50 },
     dinner:    { start: "15:09", end: "23:09", cost: 100 },

@@ -10,10 +10,9 @@ async function connectRabbitMQ() {
     
     await channel.assertQueue("notice_queue");
     await channel.assertQueue("menu_queue");
-    // await channel.assertQueue("feedback_queue"); // New queue for feedback
     await channel.assertQueue("attendance_queue_for_student");
     await channel.assertQueue("register_student_queue_for_student");
-    await channel.assertQueue("delete_student_queue");
+    await channel.assertQueue("delete_student_queue_for_student");
     await channel.assertQueue("remove_notice_queue");
 
     console.log("📌 Student connected to RabbitMQ...");
@@ -22,6 +21,13 @@ async function connectRabbitMQ() {
     channel.consume("notice_queue", async (msg) => {
       if (msg !== null) {
         const notice = JSON.parse(msg.content.toString());
+
+        if (notice.secret !== process.env.SHARED_SECRET) {
+          console.warn("❌ Unauthorized message ignored.");
+          return channel.ack(msg);
+        }
+    
+        delete notice.secret;
 
         db.query(
           "INSERT INTO notice_board (notice, block_no) VALUES (?, ?)",
@@ -41,6 +47,14 @@ async function connectRabbitMQ() {
       if (msg !== null) {
         const menuData = JSON.parse(msg.content.toString());
 
+        if (menuData.secret !== process.env.SHARED_SECRET) {
+          console.warn("❌ Unauthorized message ignored.");
+          return channel.ack(msg);
+        }
+    
+        delete menuData.secret;
+         
+
         db.query(
           "INSERT INTO menu (items, img_url, meal_slot, timestamp, block_no) VALUES (?, ?, ?, NOW(), ?)",
           [menuData.items, menuData.img_url, menuData.meal_slot, menuData.block_no],
@@ -55,32 +69,71 @@ async function connectRabbitMQ() {
     });
 
     // Listening for attendance Updates
-    channel.consume("attendance_queue_for_student", async (msg) => {
-      if (msg !== null) {
-        const attendanceData = JSON.parse(msg.content.toString());
+    // channel.consume("attendance_queue_for_student", async (msg) => {
+    //   if (msg !== null) {
+    //     const attendanceData = JSON.parse(msg.content.toString());
 
-        console.log(attendanceData)
+    //     console.log(attendanceData)
 
-        db.query(
-          "INSERT INTO attendance (reg_no, date, meal_slot, meal_cost, block_no, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
-          [attendanceData.reg_no, attendanceData.date, attendanceData.meal_slot, attendanceData.meal_cost, attendanceData.block_no, attendanceData.timestamp],
-          (err) => {
-            if (err) console.error("Error inserting attendance:", err.message);
-            else console.log("✅ attendance saved in Student Database.");
-          }
-        );
+    //     db.query(
+    //       "INSERT INTO attendance (reg_no, date, meal_slot, meal_cost, block_no, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
+    //       [attendanceData.reg_no, attendanceData.date, attendanceData.meal_slot, attendanceData.meal_cost, attendanceData.block_no, attendanceData.timestamp],
+    //       (err) => {
+    //         if (err) console.error("Error inserting attendance:", err.message);
+    //         else console.log("✅ attendance saved in Student Database.");
+    //       }
+    //     );
 
-        channel.ack(msg);
+    //     channel.ack(msg);
+    //   }
+    // });
+
+channel.consume("attendance_queue_for_student", async (msg) => {
+  if (msg !== null) {
+    const attendanceData = JSON.parse(msg.content.toString());
+
+    console.log(attendanceData);
+
+    if (attendanceData.secret !== process.env.SHARED_SECRET) {
+      console.warn("❌ Unauthorized message ignored.");
+      return channel.ack(msg);
+    }
+
+    delete attendanceData.secret;
+
+    db.query(
+      "INSERT INTO attendance (reg_no, date, meal_slot, meal_cost, block_no, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
+      [
+        attendanceData.reg_no,
+        attendanceData.date,
+        attendanceData.meal_slot,
+        attendanceData.meal_cost,
+        attendanceData.block_no,
+        attendanceData.timestamp
+      ],
+      (err) => {
+        if (err) console.error("Error inserting attendance:", err.message);
+        else console.log("✅ attendance saved in Student DB.");
       }
-    });
+    );
+
+    channel.ack(msg);
+  }
+});
+
 
      // Listening for attendance Updates
      channel.consume("register_student_queue_for_student", async (msg) => {
            if (msg !== null) {
              const registrationData = JSON.parse(msg.content.toString());
      
-             console.log(registrationData);
-     
+             if (registrationData.secret !== process.env.SHARED_SECRET) {
+              console.warn("❌ Unauthorized message ignored.");
+              return channel.ack(msg);
+            }
+        
+            delete registrationData.secret;
+             
              db.query(
                "INSERT INTO students (name, email, reg_no, roll_no, password, block_no) VALUES (?, ?, ?, ?, ?, ?)",
                [registrationData.name, registrationData.email, registrationData.reg_no, registrationData.roll_no, registrationData.password, registrationData.block_no],
@@ -94,11 +147,18 @@ async function connectRabbitMQ() {
            }
          });
 
-    channel.consume("delete_student_queue", async (msg) => {
+    channel.consume("delete_student_queue_for_student", async (msg) => {
       if (msg !== null) {
         const deleteData = JSON.parse(msg.content.toString());
     
-        // console.log(deleteData);
+        console.log(deleteData);
+
+        if (deleteData.secret !== process.env.SHARED_SECRET) {
+          console.warn("❌ Unauthorized message ignored.");
+          return channel.ack(msg);
+        }
+    
+        delete deleteData.secret;
     
         // Delete from students table
         db.query(
@@ -108,20 +168,8 @@ async function connectRabbitMQ() {
             if (err) {
               console.error("❌ Error deleting student:", err.message);
             } else {
-              // console.log("✅ Student deleted from Student Database.");
+              console.log("✅ Student deleted from Student Database.");
     
-              // Delete from attendance table
-              db.query(
-                "DELETE FROM attendance WHERE reg_no = ? AND block_no = ?;",
-                [deleteData.reg_no, deleteData.block_no],
-                (err) => {
-                  if (err) {
-                    console.error("❌ Error deleting attendance:", err.message);
-                  } else {
-                    // console.log("✅ Attendance records deleted for the student.");
-                  }
-                }
-              );
             }
           }
         );
@@ -129,13 +177,19 @@ async function connectRabbitMQ() {
         channel.ack(msg);
       }
     });
-
     
     channel.consume("remove_notice_queue", async (msg) => {
       if (msg !== null) {
         const deleteData = JSON.parse(msg.content.toString());
     
-        // console.log(deleteData);
+        console.log(deleteData);
+
+        if (deleteData.secret !== process.env.SHARED_SECRET) {
+          console.warn("❌ Unauthorized message ignored.");
+          return channel.ack(msg);
+        }
+    
+        delete deleteData.secret;
     
         // Delete from students table
         db.query(
@@ -145,7 +199,7 @@ async function connectRabbitMQ() {
             if (err) {
               console.error("❌ Error deleting student:", err.message);
             } else {
-              // console.log("✅ notice deleted from Student Database.");
+              console.log("✅ notice deleted from Student Database.");
             }
           }
         );

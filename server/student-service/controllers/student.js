@@ -232,16 +232,49 @@ module.exports.feedbackForm = async (req, res) => {
     // Publish feedback to Manager Service via RabbitMQ
     const channel = getChannel();
     if (channel) {
-      const feedbackData = { reg_no, block_no, meal_type, taste, hygiene, quantity, want_change, comments };
+      const feedbackData = {
+        reg_no,
+        block_no,
+        meal_type,
+        taste,
+        hygiene,
+        quantity,
+        want_change,
+        comments,
+        secret: process.env.SHARED_SECRET // 🛡️ Add the shared secret here
+      };
       channel.sendToQueue("feedback_queue", Buffer.from(JSON.stringify(feedbackData)));
       console.log("📤 Feedback sent to Manager Service!");
     } else {
       console.error("❌ Failed to publish feedback: RabbitMQ channel unavailable.");
     }
 
+    // if (channel) {
+    //   const feedbackData = { reg_no, block_no, meal_type, taste, hygiene, quantity, want_change, comments };
+    //   channel.sendToQueue("feedback_queue_for_scipt_service", Buffer.from(JSON.stringify(feedbackData)));
+    //   console.log("📤 Feedback sent to script Service!");
+    // } else {
+    //   console.error("❌ Failed to publish feedback: RabbitMQ channel unavailable.");
+    // }
+
     if (channel) {
-      const feedbackData = { reg_no, block_no, meal_type, taste, hygiene, quantity, want_change, comments };
-      channel.sendToQueue("feedback_queue_for_scipt_service", Buffer.from(JSON.stringify(feedbackData)));
+      const feedbackData = {
+        reg_no,
+        block_no,
+        meal_type,
+        taste,
+        hygiene,
+        quantity,
+        want_change,
+        comments,
+        secret: process.env.SHARED_SECRET // 🛡️ Add the shared secret here
+      };
+    
+      channel.sendToQueue(
+        "feedback_queue_for_scipt_service",
+        Buffer.from(JSON.stringify(feedbackData))
+      );
+    
       console.log("📤 Feedback sent to script Service!");
     } else {
       console.error("❌ Failed to publish feedback: RabbitMQ channel unavailable.");

@@ -74,3 +74,10 @@ def get_student_info(conn, reg_no, block_no):
     student = cursor.fetchone()
     cursor.close()
     return student
+
+def delete_student(conn, reg_no, block_no):
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("DELETE FROM students WHERE reg_no = %s AND block_no = %s", (reg_no, block_no))
+    student = cursor.fetchone()
+    cursor.close()
+    return student

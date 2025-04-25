@@ -37,8 +37,8 @@ def get_current_meal():
     slots = {
         "breakfast": ("09:08", "09:59", 50),
         "lunch": ("10:00", "10:00", 100),
-        "snack": ("10:01", "11:00", 50),
-        "dinner": ("11:01", "12:00", 100)
+        "snack": ("18:01", "18:59", 50),
+        "dinner": ("19:01", "20:00", 100)
     }
     for meal, (start, end, cost) in slots.items():
         if start <= now <= end:

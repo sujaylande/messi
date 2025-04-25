@@ -45,6 +45,13 @@ async function connectRabbitMQ() {
         const feedbackData = JSON.parse(msg.content.toString());
         console.log("📥 Received feedback from Student Service:", feedbackData);
 
+        if (feedbackData.secret !== process.env.SHARED_SECRET) {
+          console.warn("❌ Unauthorized message ignored.");
+          return channel.ack(msg);
+        }
+    
+        delete feedbackData.secret;
+
         // Insert feedback into Manager's database
         const query = `
           INSERT INTO feedback (reg_no, block_no, meal_type, taste_rating, hygiene_rating, quantity_rating, want_change, comments, feedback_date) 
@@ -77,8 +84,13 @@ async function connectRabbitMQ() {
       if (msg !== null) {
         const registrationData = JSON.parse(msg.content.toString());
 
-        console.log(registrationData);
-
+        if (registrationData.secret !== process.env.SHARED_SECRET) {
+          console.warn("❌ Unauthorized message ignored.");
+          return channel.ack(msg);
+        }
+    
+        delete registrationData.secret;
+    
         db.query(
           "INSERT INTO students (name, email, reg_no, roll_no, password, block_no) VALUES (?, ?, ?, ?, ?, ?)",
           [registrationData.name, registrationData.email, registrationData.reg_no, registrationData.roll_no, registrationData.password, registrationData.block_no],
@@ -96,13 +108,18 @@ async function connectRabbitMQ() {
       if (msg !== null) {
         const registrationData = JSON.parse(msg.content.toString());
     
-        // console.log("Received from FastAPI:", registrationData);
+        if (registrationData.secret !== process.env.SHARED_SECRET) {
+          console.warn("❌ Unauthorized message ignored.");
+          return channel.ack(msg);
+        }
     
+        delete registrationData.secret;
+        
         try {
           const io = getIO();
           // console.log("io", io)
           io.emit("registration-status", registrationData);
-          // console.log("Emitted to frontend:", registrationData);
+          console.log("Emitted to frontend:", registrationData);
         } catch (err) {
           console.error("Socket.io not initialized yet", err);
         }
@@ -112,25 +129,56 @@ async function connectRabbitMQ() {
     });
 
     // Listening for attendance Updates
+        // channel.consume("attendance_queue_for_manager", async (msg) => {
+        //   if (msg !== null) {
+        //     const attendanceData = JSON.parse(msg.content.toString());
+    
+        //     console.log(attendanceData)
+    
+        //     db.query(
+        //       "INSERT INTO attendance (reg_no, date, meal_slot, meal_cost, block_no, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
+        //       [attendanceData.reg_no, attendanceData.date, attendanceData.meal_slot, attendanceData.meal_cost, attendanceData.block_no, attendanceData.timestamp],
+        //       (err) => {
+        //         if (err) console.error("Error inserting attendance:", err.message);
+        //         else console.log("✅ attendance saved in Student Database.");
+        //       }
+        //     );
+    
+        //     channel.ack(msg);
+        //   }
+        // });
+    
         channel.consume("attendance_queue_for_manager", async (msg) => {
           if (msg !== null) {
             const attendanceData = JSON.parse(msg.content.toString());
-    
-            console.log(attendanceData)
-    
+        
+            if (attendanceData.secret !== process.env.SHARED_SECRET) {
+              console.warn("❌ Unauthorized message ignored.");
+              return channel.ack(msg);
+            }
+        
+            delete attendanceData.secret; // Clean up before DB insert
+        
             db.query(
               "INSERT INTO attendance (reg_no, date, meal_slot, meal_cost, block_no, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
-              [attendanceData.reg_no, attendanceData.date, attendanceData.meal_slot, attendanceData.meal_cost, attendanceData.block_no, attendanceData.timestamp],
+              [
+                attendanceData.reg_no,
+                attendanceData.date,
+                attendanceData.meal_slot,
+                attendanceData.meal_cost,
+                attendanceData.block_no,
+                attendanceData.timestamp
+              ],
               (err) => {
                 if (err) console.error("Error inserting attendance:", err.message);
-                else console.log("✅ attendance saved in Student Database.");
+                else console.log("✅ attendance saved in Manager DB.");
               }
             );
-    
+        
             channel.ack(msg);
           }
         });
-    
+        
 
     return channel;
   } catch (error) {
