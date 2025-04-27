@@ -8,9 +8,9 @@ import StudentContext from "./context/StudentContext.jsx";
 createRoot(document.getElementById("root")).render(
   <ManagerContext>
     <StudentContext>
-      <StrictMode>
+      {/* <StrictMode> */}
         <App />
-      </StrictMode>
+      {/* </StrictMode> */}
     </StudentContext>
   </ManagerContext>
 );

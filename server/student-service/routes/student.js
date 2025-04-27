@@ -16,7 +16,10 @@ router.get('/profile', authStudent, studentController.getStudentProfile)
 
 router.post('/login', studentController.studentLogin)
 
-router.get('/logout', studentController.studentLogout)
+router.get('/refresh', studentController.refreshToken)
+
+
+router.get('/logout',studentController.studentLogout)
 
 
 

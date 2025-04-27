@@ -35,6 +35,12 @@ db.connect((err) => {
   }
 });
 
+// app.use((req, res, next) => {
+//   console.log("Incoming request path:", req.path);
+//   next();
+// });
+
+
 connectRabbitMQ();
 
 app.use('/api/student', studentRoutes);

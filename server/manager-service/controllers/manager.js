@@ -50,22 +50,22 @@ module.exports.scanManually = async (req, res) => {
   try {
     // Check if student is registered
     const studentRows = await query(
-      "SELECT * FROM students WHERE reg_no = ? AND block_no = ?",
+      "SELECT reg_no FROM students WHERE reg_no = ? AND block_no = ?",
       [reg_no, block_no]
     );
-
+    
     if (studentRows.length === 0) {
       return res
         .status(200)
         .json({ message: "Not registered, you have to pay." });
     }
-
+    
     // Check if already eaten
     const attendanceRows = await query(
-      "SELECT * FROM attendance WHERE reg_no = ? AND date = ? AND meal_slot = ? AND block_no = ?",
+      "SELECT reg_no FROM attendance WHERE reg_no = ? AND date = ? AND meal_slot = ? AND block_no = ?",
       [reg_no, date, mealslot, block_no]
     );
-
+    
     if (attendanceRows.length > 0) {
       return res.status(200).json({ message: "You have already eaten." });
     }
@@ -83,16 +83,15 @@ module.exports.scanManually = async (req, res) => {
     const attendanceData = {
       reg_no: reg_no,
       date: date,
-      meal_slot: mealslot, // ✅ matches expected key
+      meal_slot: mealslot, 
       meal_cost: mealcost,
       block_no: block_no,
       timestamp: timestamp,
       secret: secret
     };
 
-    // console.log(attendanceData);
-
     const channel = getChannel();
+
     if (channel) {
       await channel.assertQueue("attendance_queue_for_student");
       channel.sendToQueue(
@@ -105,7 +104,7 @@ module.exports.scanManually = async (req, res) => {
     const payload = {
       reg_no: String(reg_no),
       date: String(date),
-      meal_slot: String(mealslot), // ✅ matches expected key
+      meal_slot: String(mealslot), 
       meal_cost: String(mealcost),
       block_no: String(block_no),
       timestamp: String(timestamp),
@@ -714,11 +713,11 @@ module.exports.todaysAttendance = (req, res) => {
 
 module.exports.attendanceProbability = async (req, res) => {
   const block_no = req.manager.block_no;
-  const cachedData = cache.get("attendance-probability");
+  // const cachedData = cache.get("attendance-probability");
 
-  if (cachedData) {
-    return res.json(cachedData);
-  }
+  // if (cachedData) {
+  //   return res.json(cachedData);
+  // }
 
   try {
     const response = await axios.get(

@@ -11,15 +11,11 @@ module.exports.authStudent = async (req, res, next) => {
   // Extract token from cookie or Authorization header
   if (req.cookies && req.cookies["student-token"]) {
     token = req.cookies["student-token"];
-  } else if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer ")
-  ) {
-    token = req.headers.authorization.split(" ")[1];
-  }
+  } 
 
   // If token is missing or empty, return 401 early
   if (!token || token.trim() === "") {
+    console.log("no token midle");
     return res.status(401).json({ message: "Unauthorized: No token provided" });
   }
 

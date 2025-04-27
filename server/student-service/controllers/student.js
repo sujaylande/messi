@@ -8,14 +8,107 @@ module.exports.getStudentProfile = async (req, res, next) => {
   res.status(200).json({ student: req.student });
 }
 
+// module.exports.studentLogout = (req, res) => {
+//   res.clearCookie("student-token", {
+//     httpOnly: true,
+//     secure: process.env.NODE_ENV === "production",
+//     sameSite: "Strict",
+//   });
+//   res.status(200).json({ message: "Logout successful" });
+// }
+
+// module.exports.studentLogin = (req, res) => {
+//   const { email, password } = req.body;
+
+//   if (!email || !password) {
+//     return res.status(400).json({ message: "Email and password are required" });
+//   }
+
+//   const query = `SELECT * FROM students WHERE email = ? LIMIT 1`;
+
+//   db.query(query, [email], async (err, results) => {
+//     if (err) {
+//       console.error(err);
+//       return res.status(500).json({ message: 'Internal server error' });
+//     }
+
+//     if (results.length === 0) {
+//       return res.status(401).json({ message: 'Invalid email or password' });
+//     }
+
+//     const student = results[0];
+
+//     try {
+//       const isMatch = await bcrypt.compare(password, student.password);
+
+      
+//       if (!isMatch) {
+//         return res.status(401).json({ message: 'Invalid email or password' });
+//       }
+
+//       const token = jwt.sign(
+//         {
+//           email: student.email,
+//           block_no: student.block_no,
+//           name: student.name,
+//           role: student.role,
+//           reg_no: student.reg_no,
+//         },
+//         process.env.JWT_SECRET,
+//         { expiresIn: '2h' }
+//       );
+
+//       // avoid naming conflict
+//       const { password: dbPassword, ...studentWithoutPassword } = student;
+
+//       res.cookie('student-token', token, {
+//         httpOnly: true,
+//         secure: process.env.NODE_ENV === 'production',
+//         sameSite: 'Strict',
+//         maxAge: 2 * 60 * 60 * 1000, // 2 hours
+//       });
+      
+//       res.status(200).json({ student: studentWithoutPassword });
+
+//     } catch (compareError) {
+//       console.error(compareError);
+//       res.status(500).json({ message: 'Password check failed' });
+//     }
+//   });
+// };
+
+
 module.exports.studentLogout = (req, res) => {
+  const refreshToken = req.cookies['student-refresh-token'];
+
+  if (refreshToken) {
+    const decoded = jwt.decode(refreshToken);
+
+    if (decoded && decoded.exp) {
+      const expiryDate = new Date(decoded.exp * 1000); // JWT exp is in seconds
+
+      const query = `INSERT INTO blacklisted_tokens (token, expiry) VALUES (?, ?)`;
+
+      db.query(query, [refreshToken, expiryDate], (err, result) => {
+        if (err) console.error("Error blacklisting token:", err);
+      });
+    }
+  }
+
   res.clearCookie("student-token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "Strict",
   });
+  res.clearCookie("student-refresh-token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Strict",
+  });
+
   res.status(200).json({ message: "Logout successful" });
-}
+};
+
 
 module.exports.studentLogin = (req, res) => {
   const { email, password } = req.body;
@@ -40,35 +133,41 @@ module.exports.studentLogin = (req, res) => {
 
     try {
       const isMatch = await bcrypt.compare(password, student.password);
-
-      
       if (!isMatch) {
         return res.status(401).json({ message: 'Invalid email or password' });
       }
 
-      const token = jwt.sign(
-        {
-          email: student.email,
-          block_no: student.block_no,
-          name: student.name,
-          role: student.role,
-          reg_no: student.reg_no,
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: '2h' }
-      );
+      const payload = {
+        email: student.email,
+        block_no: student.block_no,
+        name: student.name,
+        role: student.role,
+        reg_no: student.reg_no,
+      };
 
-      // avoid naming conflict
+      // console.log(process.env.JWT_SECRET)
+
+      const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1m' }); // Shorter lifetime
+      const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: '2m' });
+
       const { password: dbPassword, ...studentWithoutPassword } = student;
 
-      // res.cookie('student-token', token);
-      res.cookie('student-token', token, {
+      res.cookie('student-token', accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'Strict',
-        maxAge: 2 * 60 * 60 * 1000, // 2 hours
+        maxAge: 1 * 60 * 1000, // 15 min
       });
-      
+
+      res.cookie('student-refresh-token', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+        // maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        maxAge: 2 * 60 * 1000, // 15 min
+
+      });
+
       res.status(200).json({ student: studentWithoutPassword });
 
     } catch (compareError) {
@@ -77,6 +176,65 @@ module.exports.studentLogin = (req, res) => {
     }
   });
 };
+
+module.exports.refreshToken = (req, res) => {
+
+  const refreshToken = req.cookies['student-refresh-token'];
+
+  console.log("iam herer");
+
+  if (!refreshToken) {
+    return res.status(401).json({ message: 'No refresh token provided' });
+  }
+
+  // Check blacklist
+  const query = `SELECT token FROM blacklisted_tokens WHERE token = ? LIMIT 1`;
+  db.query(query, [refreshToken], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+    if (results.length > 0) {
+      return res.status(401).json({ message: "Unauthorized: Refresh token blacklisted" });
+    }
+
+    try {
+      const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+      
+      const payload = {
+        email: decoded.email,
+        block_no: decoded.block_no,
+        name: decoded.name,
+        role: decoded.role,
+        reg_no: decoded.reg_no,
+      };
+
+      const newAccessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1m' });
+
+      res.cookie('student-token', newAccessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+        maxAge: 1 * 60 * 1000, // 15 min
+      });
+
+      const newRefreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: '2m' });
+
+      res.cookie('student-refresh-token', newRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+        maxAge: 2 * 60 * 1000, // 15 min
+      });
+
+      res.status(200).json({ message: 'Access token refreshed' });
+    } catch (err) {
+      console.error("Refresh error:", err.message);
+      return res.status(403).json({ message: "Invalid refresh token" });
+    }
+  });
+};
+
 
 module.exports.studentStatistics = (req, res) => {
   try{
@@ -141,7 +299,7 @@ module.exports.studentStatistics = (req, res) => {
 
 module.exports.displayNotice = (req, res) => {
   const block_no = req.student.block_no;
-  db.query("SELECT * FROM notice_board WHERE block_no = ?", [block_no], (err, results) => {
+  db.query("SELECT notice FROM notice_board WHERE block_no = ?", [block_no], (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(results);
   });
@@ -152,7 +310,7 @@ module.exports.displayMenu = (req, res) => {
   const block_no = req.student.block_no;
   
   db.query(
-    "SELECT * FROM menu WHERE DATE(timestamp) = ? AND block_no = ?",
+    "SELECT id, items, img_url, meal_slot FROM menu WHERE DATE(timestamp) = ? AND block_no = ?",
     [today, block_no],
     (err, results) => {
       if (err) return res.status(500).json({ error: err.message });
@@ -160,45 +318,6 @@ module.exports.displayMenu = (req, res) => {
     }
   );
 };
-
-// module.exports.feedbackForm = async (req, res) => {
-
-//   try {
-//     const { reg_no, meal_type, taste, hygiene, quantity, want_change, comments } =
-//     req.body;
-
-//     if (
-//       !reg_no ||
-//       !meal_type ||
-//       !taste ||
-//       !hygiene ||
-//       !quantity
-//     ) {
-//       return res.status(400).json({
-//         error:
-//           "reg_no, meal_type, taste, hygiene, quantity and want_change  are required",
-//       });
-//     }
-
-//     const query = `INSERT INTO feedback (reg_no, meal_type, taste_rating, hygiene_rating, quantity_rating, want_change, comments, feedback_date) 
-//                    VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE())`;
-
-//     await db.execute(query, [
-//       reg_no,
-//       meal_type,
-//       taste,
-//       hygiene,
-//       quantity,
-//       want_change,
-//       comments,
-//     ]);
-
-//     res.status(201).json({ message: "Feedback submitted successfully!" });
-//   } catch (error) {
-//     console.error("Error submitting feedback:", error);
-//     res.status(500).json({ error: "Server error" });
-//   }
-// };
 
 
 module.exports.feedbackForm = async (req, res) => {
@@ -248,14 +367,6 @@ module.exports.feedbackForm = async (req, res) => {
     } else {
       console.error("❌ Failed to publish feedback: RabbitMQ channel unavailable.");
     }
-
-    // if (channel) {
-    //   const feedbackData = { reg_no, block_no, meal_type, taste, hygiene, quantity, want_change, comments };
-    //   channel.sendToQueue("feedback_queue_for_scipt_service", Buffer.from(JSON.stringify(feedbackData)));
-    //   console.log("📤 Feedback sent to script Service!");
-    // } else {
-    //   console.error("❌ Failed to publish feedback: RabbitMQ channel unavailable.");
-    // }
 
     if (channel) {
       const feedbackData = {
