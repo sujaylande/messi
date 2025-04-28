@@ -58,6 +58,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { ManagerDataContext } from '../context/ManagerContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import managerAxios from '../api/managerAxios';
 
 const ManagerProtectWrapper = ({ children }) => {
   const navigate = useNavigate();
@@ -66,7 +67,7 @@ const ManagerProtectWrapper = ({ children }) => {
 
   useEffect(() => {
     // Make auth-protected request — cookie will be sent automatically
-    axios.get("http://localhost:5000/api/manager/profile", {
+    managerAxios.get("/profile", {
       withCredentials: true
     })
       .then((response) => {

@@ -6,6 +6,8 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
 import { ScanLine, UserPlus } from "lucide-react";
 import { ManagerDataContext } from "../context/ManagerContext";
+import managerAxios from '../api/managerAxios'
+
 
 const HomePage = () => {
   const [studentStats, setStudentStats] = useState({ active: 0, inactive: 0 });
@@ -19,8 +21,8 @@ const HomePage = () => {
 
   const fetchStudentStats = async () => {
     try {
-      const { data } = await axios.get(
-        "http://localhost:5000/api/manager/active-student"
+      const { data } = await managerAxios.get(
+        "/active-student"
       );
       setStudentStats(data);
     } catch (error) {
@@ -30,8 +32,8 @@ const HomePage = () => {
 
   const fetchAttendanceToday = async () => {
     try {
-      const { data } = await axios.get(
-        "http://localhost:5000/api/manager/todays-attendance"
+      const { data } = await managerAxios.get(
+        "/todays-attendance"
       );
       setAttendanceToday(data);
     } catch (error) {
@@ -41,8 +43,8 @@ const HomePage = () => {
 
   const fetchForecast = async () => {
     try {
-      const { data } = await axios.get(
-        "http://localhost:5000/api/manager/attendance-probability"
+      const { data } = await managerAxios.get(
+        "/attendance-probability"
       );
       setForecast(data);
     } catch (error) {

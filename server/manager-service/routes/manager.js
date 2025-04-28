@@ -10,6 +10,9 @@ router.post('/login', managerController.managerLogin);
 
 router.get('/logout', managerController.managerLogout)
 
+router.get('/refresh', managerController.refreshToken)
+
+
 router.post('/register',authManager, managerController.register)
 
 router.get('/scan', authManager, managerController.scan)

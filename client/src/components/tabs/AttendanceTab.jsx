@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, memo } from "react"
 import axios from "axios"
-import axiosInstance from "../../api/axiosInstance"
+import studentAxios from "../../api/studentAxios"
 import { User, Clipboard, Download } from "lucide-react"
 
 // Memoized student details component
@@ -162,7 +162,7 @@ function AttendanceTab({ student, getStudentFromStorage, setStudent }) {
     }
 
     try {
-      const response = await axiosInstance.get(
+      const response = await studentAxios.get(
         `http://localhost:5001/api/student/student-stat/${currentStudent.reg_no}/${currentStudent.block_no}`,
       )
 

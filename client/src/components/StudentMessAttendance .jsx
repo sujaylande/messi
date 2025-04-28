@@ -222,6 +222,7 @@
 
 import { useState } from "react"
 import axios from "axios"
+import managerAxios from "../api/managerAxios"
 
 const StudentMessAttendance = () => {
   const [regNo, setRegNo] = useState("")
@@ -243,7 +244,7 @@ const StudentMessAttendance = () => {
     setError("")
 
     try {
-      const response = await axios.get(`http://localhost:5000/api/manager/student-stat/${regNo}`)
+      const response = await managerAxios.get(`/student-stat/${regNo}`)
       setAttendanceData(response.data.attendance)
       setTotalAmount(response.data.totalAmount)
       setStudentDetails(response.data.studentDetails)
@@ -264,7 +265,7 @@ const StudentMessAttendance = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/api/manager/student-status", {
+      const response = await managerAxios.post("/student-status", {
         reg_no: actionRegNo,
         status: status,
       })
@@ -289,7 +290,7 @@ const StudentMessAttendance = () => {
     }
 
     try {
-      const response = await axios.delete(`http://localhost:5000/api/manager/remove-student/${removeRegNo}`)
+      const response = await managerAxios.delete(`/remove-student/${removeRegNo}`)
       if (response.status === 404) {
         alert("Student not found")
       } else if (response.status === 200) {

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import axios from "axios";
 axios.defaults.withCredentials = true;
+import managerAxios from '../api/managerAxios'
 
 
 import {
@@ -79,8 +80,8 @@ const MessStatistics = () => {
   const fetchStudents = (status) => {
     setIsLoading(true)
   
-    axios
-      .get(`http://localhost:5000/api/manager/students-status-list?status=${status}`)
+    managerAxios
+      .get(`/students-status-list?status=${status}`)
       .then((res) => {
         setStudents(res.data)
         setIsLoading(false)
@@ -95,8 +96,8 @@ const MessStatistics = () => {
   useEffect(() => {
     setIsLoading(true)
   
-    axios
-      .get('http://localhost:5000/api/manager/mess-stat')
+    managerAxios
+      .get('/mess-stat')
       .then((res) => {
         setData(res.data)
         setIsLoading(false)

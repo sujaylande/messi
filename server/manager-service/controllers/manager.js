@@ -130,12 +130,44 @@ module.exports.getManagerProfile = async (req, res, next) => {
   res.status(200).json({ manager: req.manager });
 };
 
+// module.exports.managerLogout = (req, res) => {
+//   res.clearCookie("manager-token", {
+//     httpOnly: true,
+//     secure: process.env.NODE_ENV === "production",
+//     sameSite: "Strict",
+//   });
+//   res.status(200).json({ message: "Logout successful" });
+// };
+
+
 module.exports.managerLogout = (req, res) => {
+  const refreshToken = req.cookies['manager-refresh-token'];
+
+  if (refreshToken) {
+    const decoded = jwt.decode(refreshToken);
+
+    if (decoded && decoded.exp) {
+      const expiryDate = new Date(decoded.exp * 1000); // JWT exp is in seconds
+
+      const query = `INSERT INTO blacklisted_tokens (token, expiry) VALUES (?, ?)`;
+
+      db.query(query, [refreshToken, expiryDate], (err, result) => {
+        if (err) console.error("Error blacklisting token:", err);
+      });
+    }
+  }
+
   res.clearCookie("manager-token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "Strict",
   });
+  res.clearCookie("manager-refresh-token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Strict",
+  });
+
   res.status(200).json({ message: "Logout successful" });
 };
 
@@ -160,7 +192,7 @@ module.exports.managerLogin = (req, res) => {
 
     const manager = results[0];
 
-    console.log(manager);
+    // console.log(manager);
 
     try {
       const isMatch = await bcrypt.compare(password, manager.password);
@@ -168,7 +200,7 @@ module.exports.managerLogin = (req, res) => {
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
-      const token = jwt.sign(
+      const accessToken = jwt.sign(
         {
           email: manager.email,
           block_no: manager.block_no,
@@ -177,25 +209,108 @@ module.exports.managerLogin = (req, res) => {
           mess_name: manager.mess_name,
         },
         process.env.JWT_SECRET,
-        { expiresIn: "2h" }
+        { expiresIn: "1m" }
       );
+
+            const refreshToken = jwt.sign({
+              email: manager.email,
+              block_no: manager.block_no,
+              name: manager.name,
+              role: manager.role,
+              mess_name: manager.mess_name,
+            }, process.env.JWT_REFRESH_SECRET, { expiresIn: '2m' });
+      
 
       // avoid naming conflict
       const { password: dbPassword, ...managerWithoutPassword } = manager;
 
       // res.cookie('manager-token', token);
       // res.cookie('student-token', token);
-      res.cookie("manager-token", token, {
+      // res.cookie("manager-token", accessToken, {
+      //   httpOnly: true,
+      //   secure: process.env.NODE_ENV === "production",
+      //   sameSite: "Strict",
+      //   maxAge: 2 * 60 * 60 * 1000, // 2 hours
+      // });
+
+      res.cookie('manager-token', accessToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "Strict",
-        maxAge: 2 * 60 * 60 * 1000, // 2 hours
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+        maxAge: 1 * 60 * 1000, // 15 min
+      });
+
+      res.cookie('manager-refresh-token', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+        // maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        maxAge: 2 * 60 * 1000, // 15 min
+
       });
 
       res.status(200).json({ manager: managerWithoutPassword });
     } catch (compareError) {
       console.error(compareError);
       res.status(500).json({ message: "Password check failed" });
+    }
+  });
+};
+
+module.exports.refreshToken = (req, res) => {
+
+  const refreshToken = req.cookies['manager-refresh-token'];
+
+  console.log("iam herer");
+
+  if (!refreshToken) {
+    return res.status(401).json({ message: 'No refresh token provided' });
+  }
+
+  // Check blacklist
+  const query = `SELECT token FROM blacklisted_tokens WHERE token = ? LIMIT 1`;
+  db.query(query, [refreshToken], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+    if (results.length > 0) {
+      return res.status(401).json({ message: "Unauthorized: Refresh token blacklisted" });
+    }
+
+    try {
+      const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+      
+      const payload = {
+        email: decoded.email,
+        block_no: decoded.block_no,
+        name: decoded.name,
+        role: decoded.role,
+        mess_name: decoded.mess_name,
+      };
+
+      const newAccessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1m' });
+
+      res.cookie('manager-token', newAccessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+        maxAge: 1 * 60 * 1000, // 15 min
+      });
+
+      const newRefreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: '2m' });
+
+      res.cookie('manager-refresh-token', newRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+        maxAge: 2 * 60 * 1000, // 15 min
+      });
+
+      res.status(200).json({ message: 'Access token refreshed' });
+    } catch (err) {
+      console.error("Refresh error:", err.message);
+      return res.status(403).json({ message: "Invalid refresh token" });
     }
   });
 };

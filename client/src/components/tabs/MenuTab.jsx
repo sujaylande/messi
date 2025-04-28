@@ -3,7 +3,7 @@
 import { useState, useEffect, memo } from "react"
 import axios from "axios"
 import { Coffee, Utensils, Clock, Moon } from "lucide-react"
-import axiosInstance from "../../api/axiosInstance"
+import studentAxios from "../../api/studentAxios"
 
 // Memoized menu item component for better performance
 const MenuItem = memo(({ item }) => {
@@ -48,7 +48,7 @@ function MenuTab() {
     const fetchMenu = async () => {
       try {
         setLoading(true)
-        const res = await axiosInstance.get("http://localhost:5001/api/student/display-menu")
+        const res = await studentAxios.get("http://localhost:5001/api/student/display-menu")
         setMenu(res.data)
       } catch (error) {
         console.error("Error fetching menu:", error)

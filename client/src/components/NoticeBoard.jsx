@@ -58,6 +58,7 @@
 
 import { useEffect, useState } from "react"
 import axios from "axios"
+import managerAxios from '../api/managerAxios'
 
 axios.defaults.withCredentials = true
 
@@ -75,7 +76,7 @@ export default function NoticeBoard() {
   const fetchNotices = async () => {
     setLoading(true)
     try {
-      const res = await axios.get("http://localhost:5000/api/manager/display-notices")
+      const res = await managerAxios.get("/display-notices")
       setNotices(res.data)
       setError("")
     } catch (err) {
@@ -91,7 +92,7 @@ export default function NoticeBoard() {
 
     setIsSubmitting(true)
     try {
-      await axios.post("http://localhost:5000/api/manager/add-notice", { notice })
+      await managerAxios.post("/add-notice", { notice })
       setNotice("")
       fetchNotices()
     } catch (err) {
@@ -104,7 +105,7 @@ export default function NoticeBoard() {
 
   const deleteNotice = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/manager/remove-notice/${id}`)
+      await managerAxios.delete(`/remove-notice/${id}`)
       fetchNotices()
     } catch (err) {
       console.error("Error deleting notice:", err)

@@ -34,6 +34,7 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 import { MenuForm } from "../components/MenuForm"
 import { MenuBoard } from "../components/MenuBoard"
+import managerAxios from "../api/managerAxios"
 
 axios.defaults.withCredentials = true
 
@@ -49,7 +50,7 @@ function Menu() {
   const fetchMenu = async () => {
     setIsLoading(true)
     try {
-      const res = await axios.get("http://localhost:5000/api/manager/display-menu")
+      const res = await managerAxios.get("/display-menu")
       setMenu(res.data)
       setError(null)
     } catch (err) {

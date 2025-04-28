@@ -3,7 +3,7 @@
 import { useState, useEffect, memo } from "react"
 import axios from "axios"
 import { Bell, AlertCircle } from "lucide-react"
-import axiosInstance from "../../api/axiosInstance"
+import studentAxios from "../../api/studentAxios"
 
 // Memoized notice item component
 const NoticeItem = memo(({ notice }) => {
@@ -30,7 +30,7 @@ function NoticesTab() {
     const fetchNotices = async () => {
       try {
         setLoading(true)
-        const res = await axiosInstance.get("http://localhost:5001/api/student/display-notices")
+        const res = await studentAxios.get("http://localhost:5001/api/student/display-notices")
         setNotices(res.data)
       } catch (error) {
         console.error("Error fetching notices:", error)

@@ -63,6 +63,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 axios.defaults.withCredentials = true;
+import managerAxios from '../api/managerAxios'
 
 function Scan() {
   const [isScanning, setIsScanning] = useState(false);
@@ -76,7 +77,7 @@ function Scan() {
     setResponseMsg(null);
 
     try {
-      const response = await axios.get('http://localhost:5000/api/manager/scan');
+      const response = await managerAxios.get('/scan');
 
       setResponseMsg(response.data.message || response.data.error || "Unknown response");
       setIsSuccess(response.status === 200);
@@ -96,7 +97,7 @@ function Scan() {
     setResponseMsg(null);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/manager/scan-manually', {
+      const response = await managerAxios.post('/scan-manually', {
         reg_no: regNo.trim()
       });
 

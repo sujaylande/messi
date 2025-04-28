@@ -157,6 +157,7 @@
 import { useState, useEffect } from "react"
 import axios from "axios"
 import { io } from "socket.io-client"
+import managerAxios from '../api/managerAxios'
 
 axios.defaults.withCredentials = true
 
@@ -194,7 +195,7 @@ function Register() {
     setStep("waiting") // Show waiting message
 
     try {
-      const response = await axios.post("http://localhost:5000/api/manager/register", {
+      const response = await managerAxios.post("/register", {
         name,
         email,
         reg_no,

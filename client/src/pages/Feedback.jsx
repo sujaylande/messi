@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import axios from "axios"
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, Label } from "recharts"
+import managerAxios from "../api/managerAxios";
 axios.defaults.withCredentials = true;
 
 
@@ -17,8 +18,8 @@ export default function FeedbackInsights() {
       try {
         setLoading(true)
         const [statsResponse, commentsResponse] = await Promise.all([
-          axios.get("http://localhost:5000/api/manager/feedback-stats"),
-          axios.get("http://localhost:5000/api/manager/negative-feedback"),
+          managerAxios.get("http://localhost:5000/api/manager/feedback-stats"),
+          managerAxios.get("http://localhost:5000/api/manager/negative-feedback"),
         ])
 
         // Data validation and transformation

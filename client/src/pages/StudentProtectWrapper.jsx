@@ -50,6 +50,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { StudentDataContext } from '../context/StudentContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import studentAxios from '../api/studentAxios';
 
 const StudentProtectWrapper = ({ children }) => {
   const navigate = useNavigate();
@@ -58,7 +59,7 @@ const StudentProtectWrapper = ({ children }) => {
 
   useEffect(() => {
     // Fetch the student profile — the cookie will be sent automatically
-    axios.get("http://localhost:5001/api/student/profile", {
+    studentAxios.get("/profile", {
       withCredentials: true // Just in case axios.defaults.withCredentials isn't set
     })
       .then((response) => {

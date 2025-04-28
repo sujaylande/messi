@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
-import axiosInstance from "../../api/axiosInstance"
+import studentAxios from "../../api/studentAxios"
 
 import { useState, useCallback, memo } from "react"
 import axios from "axios"
@@ -80,7 +80,7 @@ function FeedbackTab({ student }) {
 
       try {
         setSubmitting(true)
-        await axiosInstance.post("http://localhost:5001/api/student/feedback-form", formData)
+        await studentAxios.post("http://localhost:5001/api/student/feedback-form", formData)
         setFeedbackSuccess(true)
 
         // Reset form

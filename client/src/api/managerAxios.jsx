@@ -1,27 +1,26 @@
-// src/api/axiosInstance.js
+// src/api/managerAxios.js
 import axios from 'axios';
 import { createBrowserHistory } from 'history';
 
 const history = createBrowserHistory();
 
-const axiosInstance = axios.create({
-  baseURL: 'http://localhost:5001/api/student', // Your backend URL
+const managerAxios = axios.create({
+  baseURL: 'http://localhost:5000/api/manager',
   withCredentials: true,
 });
 
 let isRefreshing = false;
 
-axiosInstance.interceptors.response.use(
+managerAxios.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
     if (error.response && error.response.status === 401 && !originalRequest._retry) {
       
-      // ⚠️ Important: Prevent infinite loops by checking if it's a refresh call itself
       if (originalRequest.url.includes('/refresh')) {
-        console.error("Refresh token invalid. Redirecting to login...");
-        history.push('/');
+        console.error("Manager Refresh token invalid. Redirecting...");
+        history.push('/'); // manager login page
         window.location.reload();
         return Promise.reject(error);
       }
@@ -30,12 +29,12 @@ axiosInstance.interceptors.response.use(
         isRefreshing = true;
         originalRequest._retry = true;
         try {
-          console.log("Trying refresh token...");
-          await axiosInstance.get('/refresh'); // Try refresh token
+          console.log("Trying manager refresh...");
+          await managerAxios.get('/refresh');
           isRefreshing = false;
-          return axiosInstance(originalRequest); // Retry the original request
+          return managerAxios(originalRequest);
         } catch (refreshError) {
-          console.error("Refresh token expired or invalid:", refreshError);
+          console.error("Manager refresh token expired:", refreshError);
           isRefreshing = false;
           history.push('/');
           window.location.reload();
@@ -48,4 +47,4 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-export default axiosInstance;
+export default managerAxios;

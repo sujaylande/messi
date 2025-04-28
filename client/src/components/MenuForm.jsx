@@ -94,6 +94,7 @@
 
 import { useState, useRef, useCallback } from "react"
 import axios from "axios"
+import managerAxios from '../api/managerAxios'
 
 axios.defaults.withCredentials = true
 
@@ -132,7 +133,7 @@ export function MenuForm({ fetchMenu }) {
     formData.append("image", image)
 
     try {
-      const response = await axios.post("http://localhost:5000/api/manager/add-menu", formData)
+      const response = await managerAxios.post("/add-menu", formData)
 
       if (response.data.message) {
         // Success
