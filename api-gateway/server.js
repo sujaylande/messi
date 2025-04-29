@@ -4,6 +4,7 @@ require('dotenv').config();
 const cors = require('cors');
 
 const app = express();
+const PORT = process.env.PORT || 8080;
 
 // Logger
 app.use(morgan('dev'));
@@ -23,7 +24,6 @@ app.get('/', (req, res) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`🚀 API Gateway started on port ${PORT}`);
 });
