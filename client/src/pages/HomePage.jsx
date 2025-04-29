@@ -109,8 +109,8 @@ const HomePage = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.get(
-        "http://localhost:5000/api/manager/logout",
+      await managerAxios.get(
+        "/logout",
         {},
         {
           withCredentials: true,

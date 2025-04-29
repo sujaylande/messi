@@ -35,8 +35,13 @@ db.connect((err) => {
 
 connectRabbitMQ();
 
-app.use('/api/manager', managerRoutes);
+// app.use('/api/manager', managerRoutes);
+app.use('/', managerRoutes);
 
+app.use((req, res, next) => {
+  console.log("Incoming request path:", req.path);
+  next();
+});
 
 module.exports = app;
 // app.listen(process.env.PORT, () => console.log(`Server running on port ${process.env.PORT}`));

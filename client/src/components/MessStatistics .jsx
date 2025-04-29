@@ -175,11 +175,11 @@ const MessStatistics = () => {
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-1">
               <Link
-                to="/homepage"
+                to="/student-stat"
                 className="flex items-center text-gray-700 hover:bg-blue-50 hover:text-blue-700 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 <Home className="mr-1 h-4 w-4" />
-                Dashboard
+                Student Statistics
               </Link>
               <Link
                 to="/menu"
@@ -202,13 +202,13 @@ const MessStatistics = () => {
                 <Bell className="mr-1 h-4 w-4" />
                 Notice Board
               </Link>
-              <Link
+              {/* <Link
                 to="/student-stat"
                 className="flex items-center text-blue-700 bg-blue-50 px-3 py-2 rounded-md text-sm font-medium"
               >
                 <Users className="mr-1 h-4 w-4" />
                 Student Statistics
-              </Link>
+              </Link> */}
             </div>
 
             {/* Mobile menu button */}
@@ -228,11 +228,11 @@ const MessStatistics = () => {
           <div className="md:hidden bg-white shadow-lg">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               <Link
-                to="/"
+                to="/student-stat"
                 className="flex items-center text-gray-700 hover:bg-blue-50 hover:text-blue-700 block px-3 py-2 rounded-md text-base font-medium"
               >
                 <Home className="mr-2 h-5 w-5" />
-                Dashboard
+                Student Statistics
               </Link>
               <Link
                 to="/menu"
@@ -255,13 +255,13 @@ const MessStatistics = () => {
                 <Bell className="mr-2 h-5 w-5" />
                 Notice Board
               </Link>
-              <Link
+              {/* <Link
                 to="/student-stat"
                 className="flex items-center text-blue-700 bg-blue-50 block px-3 py-2 rounded-md text-base font-medium"
               >
                 <Users className="mr-2 h-5 w-5" />
                 Student Statistics
-              </Link>
+              </Link> */}
             </div>
           </div>
         )}

@@ -30,7 +30,7 @@ function NoticesTab() {
     const fetchNotices = async () => {
       try {
         setLoading(true)
-        const res = await studentAxios.get("http://localhost:5001/api/student/display-notices")
+        const res = await studentAxios.get("/display-notices")
         setNotices(res.data)
       } catch (error) {
         console.error("Error fetching notices:", error)

@@ -163,7 +163,7 @@ function AttendanceTab({ student, getStudentFromStorage, setStudent }) {
 
     try {
       const response = await studentAxios.get(
-        `http://localhost:5001/api/student/student-stat/${currentStudent.reg_no}/${currentStudent.block_no}`,
+        `/student-stat/${currentStudent.reg_no}/${currentStudent.block_no}`,
       )
 
       // Process attendance data to fix date formatting

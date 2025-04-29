@@ -5,7 +5,7 @@ import { createBrowserHistory } from 'history';
 const history = createBrowserHistory();
 
 const managerAxios = axios.create({
-  baseURL: 'http://localhost:5000/api/manager',
+  baseURL: 'http://localhost:8080/api/manager',
   withCredentials: true,
 });
 

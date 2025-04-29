@@ -18,8 +18,8 @@ export default function FeedbackInsights() {
       try {
         setLoading(true)
         const [statsResponse, commentsResponse] = await Promise.all([
-          managerAxios.get("http://localhost:5000/api/manager/feedback-stats"),
-          managerAxios.get("http://localhost:5000/api/manager/negative-feedback"),
+          managerAxios.get("/feedback-stats"),
+          managerAxios.get("/negative-feedback"),
         ])
 
         // Data validation and transformation

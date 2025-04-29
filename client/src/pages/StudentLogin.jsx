@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { StudentDataContext } from '../context/StudentContext'
 import { Link } from 'react-router-dom'
+import studentAxios from '../api/studentAxios'
 
 
 const StudentLogin = () => {
@@ -21,7 +22,7 @@ const StudentLogin = () => {
       password
     }
 
-    const response = await axios.post("http://localhost:5001/api/student/login", student)
+    const response = await studentAxios.post("/login", student)
 
 
     if (response.status === 200) {

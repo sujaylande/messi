@@ -48,7 +48,7 @@ function MenuTab() {
     const fetchMenu = async () => {
       try {
         setLoading(true)
-        const res = await studentAxios.get("http://localhost:5001/api/student/display-menu")
+        const res = await studentAxios.get("/display-menu")
         setMenu(res.data)
       } catch (error) {
         console.error("Error fetching menu:", error)

@@ -35,15 +35,15 @@ db.connect((err) => {
   }
 });
 
-// app.use((req, res, next) => {
-//   console.log("Incoming request path:", req.path);
-//   next();
-// });
+app.use((req, res, next) => {
+  console.log("Incoming request path:", req.path);
+  next();
+});
 
 
 connectRabbitMQ();
 
-app.use('/api/student', studentRoutes);
+app.use('/', studentRoutes);
 
 
 app.listen(process.env.PORT, () => console.log(`Server running on port ${process.env.PORT}`));

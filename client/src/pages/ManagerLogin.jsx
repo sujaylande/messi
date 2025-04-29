@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { ManagerDataContext } from '../context/ManagerContext'
 import { Link } from 'react-router-dom'
+import managerAxios from '../api/managerAxios'
 
 
 const ManagerLogin = () => {
@@ -22,7 +23,7 @@ const ManagerLogin = () => {
       password
     }
 
-    const response = await axios.post("http://localhost:5000/api/manager/login", manager)
+    const response = await managerAxios.post("/login", manager)
 
     if (response.status === 200) {
       const data = response.data

@@ -811,6 +811,7 @@ import axios from "axios"
 import { Calendar, Bell, User, ThumbsUp, LogOut } from "lucide-react"
 import { StudentDataContext } from "../context/StudentContext"
 import { useNavigate } from "react-router-dom"
+import studentAxios from "../api/studentAxios"
 
 // Lazy load tab components
 const MenuTab = lazy(() => import("../components/tabs/MenuTab"))
@@ -836,7 +837,7 @@ function StudentPublic() {
   // Memoized logout handler
   const handleLogout = useCallback(async () => {
     try {
-      await axios.get("http://localhost:5001/api/student/logout", {
+      await studentAxios.get("/logout", {
         withCredentials: true,
       })
 

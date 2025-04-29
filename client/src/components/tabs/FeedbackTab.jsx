@@ -80,7 +80,7 @@ function FeedbackTab({ student }) {
 
       try {
         setSubmitting(true)
-        await studentAxios.post("http://localhost:5001/api/student/feedback-form", formData)
+        await studentAxios.post("/feedback-form", formData)
         setFeedbackSuccess(true)
 
         // Reset form
