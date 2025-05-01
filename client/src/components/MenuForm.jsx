@@ -98,7 +98,7 @@ import managerAxios from '../api/managerAxios'
 
 axios.defaults.withCredentials = true
 
-export function MenuForm({ fetchMenu }) {
+function MenuForm({ fetchMenu }) {
   const [items, setItems] = useState("")
   const [mealSlot, setMealSlot] = useState("Breakfast")
   const [image, setImage] = useState(null)
@@ -322,3 +322,6 @@ export function MenuForm({ fetchMenu }) {
     </div>
   )
 }
+
+
+export default MenuForm

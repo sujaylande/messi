@@ -804,14 +804,207 @@
 
 
 
+// "use client"
+
+// import { useContext, useEffect, useState, useCallback, lazy, Suspense, memo } from "react"
+// import axios from "axios"
+// import { Calendar, Bell, User, ThumbsUp, LogOut } from "lucide-react"
+// import { StudentDataContext } from "../context/StudentContext"
+// import { useNavigate } from "react-router-dom"
+// import studentAxios from "../api/studentAxios"
+// import {ErrorBoundary} from "react-error-boundary"
+// import ErrorFallback from "../utils/ErrorBoundary.jsx"
+
+// // Lazy load tab components
+// const MenuTab = lazy(() => import("../components/tabs/MenuTab"))
+// const NoticesTab = lazy(() => import("../components/tabs/NoticesTab"))
+// const FeedbackTab = lazy(() => import("../components/tabs/FeedbackTab"))
+// const AttendanceTab = lazy(() => import("../components/tabs/AttendanceTab"))
+
+// axios.defaults.withCredentials = true
+
+// // Loading fallback component
+// const LoadingFallback = memo(() => (
+//   <div className="flex justify-center items-center py-10">
+//     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+//     <span className="ml-3 text-lg text-gray-600">Loading...</span>
+//   </div>
+// ))
+
+// function StudentPublic() {
+//   const [activeTab, setActiveTab] = useState("menu")
+//   const { student, setStudent } = useContext(StudentDataContext)
+//   const navigate = useNavigate()
+
+//   // Memoized logout handler
+//   const handleLogout = useCallback(async () => {
+//     try {
+//       await studentAxios.get("/logout", {
+//         withCredentials: true,
+//       })
+
+//       // Clear student context
+//       setStudent(null)
+
+//       // Remove any localStorage data related to student
+//       localStorage.removeItem("student-data")
+
+//       // Redirect to login/home
+//       navigate("/")
+//     } catch (error) {
+//       console.error("Logout failed:", error.response?.data?.message || error.message)
+//       alert("Logout failed. Please try again.")
+//     }
+//   }, [setStudent, navigate])
+
+//   // Get student from storage if not in context
+//   const getStudentFromStorage = useCallback(() => {
+//     try {
+//       const storedStudent = localStorage.getItem("student-data")
+//       if (storedStudent) {
+//         const parsedStudent = JSON.parse(storedStudent)
+//         setStudent(parsedStudent)
+//         return parsedStudent
+//       }
+//     } catch (error) {
+//       console.error("Error getting student from storage:", error)
+//     }
+//     return null
+//   }, [setStudent])
+
+//   // Check for student data on initial load
+//   useEffect(() => {
+//     if (!student) {
+//       getStudentFromStorage()
+//     }
+//   }, [student, getStudentFromStorage])
+
+//   // Handle tab change
+//   const handleTabChange = useCallback((tab) => {
+//     setActiveTab(tab)
+//   }, [])
+
+//   return (
+//     <div className="min-h-screen bg-gray-50 flex flex-col">
+//       {/* Header */}
+//       <header className="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg relative">
+//         <div className="container mx-auto px-4 py-6 flex justify-between items-center">
+//           <div>
+//             <h1 className="text-3xl font-bold">Student Mess Portal</h1>
+//             <p className="mt-1 text-blue-100">View menu, submit feedback, and check attendance</p>
+//           </div>
+//           <button
+//             onClick={handleLogout}
+//             className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center"
+//           >
+//             <LogOut className="mr-2 h-4 w-4" />
+//             Logout
+//           </button>
+//         </div>
+//       </header>
+
+//       {/* Navigation Tabs */}
+//       <div className="bg-white shadow">
+//         <div className="container mx-auto px-4">
+//           <div className="flex overflow-x-auto">
+//             <button
+//               onClick={() => handleTabChange("menu")}
+//               className={`flex items-center px-4 py-3 font-medium border-b-2 ${
+//                 activeTab === "menu"
+//                   ? "border-blue-600 text-blue-600"
+//                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+//               }`}
+//             >
+//               <Calendar className="mr-2 h-5 w-5" />
+//               Today's Menu
+//             </button>
+//             <button
+//               onClick={() => handleTabChange("notices")}
+//               className={`flex items-center px-4 py-3 font-medium border-b-2 ${
+//                 activeTab === "notices"
+//                   ? "border-blue-600 text-blue-600"
+//                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+//               }`}
+//             >
+//               <Bell className="mr-2 h-5 w-5" />
+//               Notice Board
+//             </button>
+//             <button
+//               onClick={() => handleTabChange("feedback")}
+//               className={`flex items-center px-4 py-3 font-medium border-b-2 ${
+//                 activeTab === "feedback"
+//                   ? "border-blue-600 text-blue-600"
+//                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+//               }`}
+//             >
+//               <ThumbsUp className="mr-2 h-5 w-5" />
+//               Feedback
+//             </button>
+//             <button
+//               onClick={() => handleTabChange("attendance")}
+//               className={`flex items-center px-4 py-3 font-medium border-b-2 ${
+//                 activeTab === "attendance"
+//                   ? "border-blue-600 text-blue-600"
+//                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+//               }`}
+//             >
+//               <User className="mr-2 h-5 w-5" />
+//               Attendance
+//             </button>
+//           </div>
+//         </div>
+//       </div>
+
+
+//       {/* Main Content */}
+//       <main className="container mx-auto px-4 py-8 flex-grow">
+//         <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
+//           <Suspense fallback={<LoadingFallback />}>
+//             {activeTab === "menu" && <MenuTab />}
+//             {activeTab === "notices" && <NoticesTab />}
+//             {activeTab === "feedback" && <FeedbackTab student={student} />}
+//             {activeTab === "attendance" && (
+//               <AttendanceTab student={student} getStudentFromStorage={getStudentFromStorage} />
+//             )}
+//           </Suspense>
+//         </ErrorBoundary>
+
+//       </main>
+
+//       {/* Footer */}
+//       <footer className="bg-gray-800 text-white py-6 mt-auto">
+//         <div className="container mx-auto px-4 text-center">
+//           <p>© {new Date().getFullYear()} Student Mess Management System</p>
+//           <p className="text-gray-400 text-sm mt-1">Providing quality meals and service to students</p>
+//         </div>
+//       </footer>
+//     </div>
+//   )
+// }
+
+// export default StudentPublic
+
 "use client"
 
-import { useContext, useEffect, useState, useCallback, lazy, Suspense, memo } from "react"
-import axios from "axios"
+import { useContext, useState, lazy, Suspense, memo } from "react"
 import { Calendar, Bell, User, ThumbsUp, LogOut } from "lucide-react"
 import { StudentDataContext } from "../context/StudentContext"
 import { useNavigate } from "react-router-dom"
 import studentAxios from "../api/studentAxios"
+import { ErrorBoundary } from "react-error-boundary"
+import ErrorFallback from "../utils/ErrorBoundary.jsx"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes default stale time
+      retry: 1,
+    },
+  },
+})
 
 // Lazy load tab components
 const MenuTab = lazy(() => import("../components/tabs/MenuTab"))
@@ -819,13 +1012,15 @@ const NoticesTab = lazy(() => import("../components/tabs/NoticesTab"))
 const FeedbackTab = lazy(() => import("../components/tabs/FeedbackTab"))
 const AttendanceTab = lazy(() => import("../components/tabs/AttendanceTab"))
 
-axios.defaults.withCredentials = true
-
-// Loading fallback component
-const LoadingFallback = memo(() => (
-  <div className="flex justify-center items-center py-10">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
-    <span className="ml-3 text-lg text-gray-600">Loading...</span>
+// Shimmer loading component (skeleton loader)
+const ShimmerLoading = memo(() => (
+  <div className="animate-pulse space-y-4">
+    <div className="h-12 bg-gray-200 rounded-md w-3/4 mx-auto"></div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="bg-gray-200 h-64 rounded-lg"></div>
+      ))}
+    </div>
   </div>
 ))
 
@@ -834,8 +1029,8 @@ function StudentPublic() {
   const { student, setStudent } = useContext(StudentDataContext)
   const navigate = useNavigate()
 
-  // Memoized logout handler
-  const handleLogout = useCallback(async () => {
+  // Logout handler
+  const handleLogout = async () => {
     try {
       await studentAxios.get("/logout", {
         withCredentials: true,
@@ -853,10 +1048,10 @@ function StudentPublic() {
       console.error("Logout failed:", error.response?.data?.message || error.message)
       alert("Logout failed. Please try again.")
     }
-  }, [setStudent, navigate])
+  }
 
   // Get student from storage if not in context
-  const getStudentFromStorage = useCallback(() => {
+  const getStudentFromStorage = () => {
     try {
       const storedStudent = localStorage.getItem("student-data")
       if (storedStudent) {
@@ -868,113 +1063,135 @@ function StudentPublic() {
       console.error("Error getting student from storage:", error)
     }
     return null
-  }, [setStudent])
+  }
 
   // Check for student data on initial load
-  useEffect(() => {
+  useState(() => {
     if (!student) {
       getStudentFromStorage()
     }
-  }, [student, getStudentFromStorage])
-
-  // Handle tab change
-  const handleTabChange = useCallback((tab) => {
-    setActiveTab(tab)
   }, [])
 
+  // Handle tab change
+  const handleTabChange = (tab) => {
+    // Prefetch data for the tab that's being activated
+    if (tab === "menu") {
+      queryClient.prefetchQuery({
+        queryKey: ["menu"],
+        queryFn: () => studentAxios.get("/display-menu").then((res) => res.data),
+      })
+    } else if (tab === "notices") {
+      queryClient.prefetchQuery({
+        queryKey: ["notices"],
+        queryFn: () => studentAxios.get("/display-notices").then((res) => res.data),
+      })
+    } else if (tab === "attendance" && student) {
+      queryClient.prefetchQuery({
+        queryKey: ["attendance", student.reg_no, student.block_no],
+        queryFn: () => studentAxios.get(`/student-stat/${student.reg_no}/${student.block_no}`).then((res) => res.data),
+      })
+    }
+
+    setActiveTab(tab)
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg relative">
-        <div className="container mx-auto px-4 py-6 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">Student Mess Portal</h1>
-            <p className="mt-1 text-blue-100">View menu, submit feedback, and check attendance</p>
+    <QueryClientProvider client={queryClient}>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        {/* Header */}
+        <header className="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg relative">
+          <div className="container mx-auto px-4 py-6 flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold">Student Mess Portal</h1>
+              <p className="mt-1 text-blue-100">View menu, submit feedback, and check attendance</p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </button>
           </div>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </button>
-        </div>
-      </header>
+        </header>
 
-      {/* Navigation Tabs */}
-      <div className="bg-white shadow">
-        <div className="container mx-auto px-4">
-          <div className="flex overflow-x-auto">
-            <button
-              onClick={() => handleTabChange("menu")}
-              className={`flex items-center px-4 py-3 font-medium border-b-2 ${
-                activeTab === "menu"
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              <Calendar className="mr-2 h-5 w-5" />
-              Today's Menu
-            </button>
-            <button
-              onClick={() => handleTabChange("notices")}
-              className={`flex items-center px-4 py-3 font-medium border-b-2 ${
-                activeTab === "notices"
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              <Bell className="mr-2 h-5 w-5" />
-              Notice Board
-            </button>
-            <button
-              onClick={() => handleTabChange("feedback")}
-              className={`flex items-center px-4 py-3 font-medium border-b-2 ${
-                activeTab === "feedback"
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              <ThumbsUp className="mr-2 h-5 w-5" />
-              Feedback
-            </button>
-            <button
-              onClick={() => handleTabChange("attendance")}
-              className={`flex items-center px-4 py-3 font-medium border-b-2 ${
-                activeTab === "attendance"
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              <User className="mr-2 h-5 w-5" />
-              Attendance
-            </button>
+        {/* Navigation Tabs */}
+        <div className="bg-white shadow">
+          <div className="container mx-auto px-4">
+            <div className="flex overflow-x-auto">
+              <button
+                onClick={() => handleTabChange("menu")}
+                className={`flex items-center px-4 py-3 font-medium border-b-2 ${
+                  activeTab === "menu"
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                <Calendar className="mr-2 h-5 w-5" />
+                Today's Menu
+              </button>
+              <button
+                onClick={() => handleTabChange("notices")}
+                className={`flex items-center px-4 py-3 font-medium border-b-2 ${
+                  activeTab === "notices"
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                <Bell className="mr-2 h-5 w-5" />
+                Notice Board
+              </button>
+              <button
+                onClick={() => handleTabChange("feedback")}
+                className={`flex items-center px-4 py-3 font-medium border-b-2 ${
+                  activeTab === "feedback"
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                <ThumbsUp className="mr-2 h-5 w-5" />
+                Feedback
+              </button>
+              <button
+                onClick={() => handleTabChange("attendance")}
+                className={`flex items-center px-4 py-3 font-medium border-b-2 ${
+                  activeTab === "attendance"
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                <User className="mr-2 h-5 w-5" />
+                Attendance
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Main Content */}
+        <main className="container mx-auto px-4 py-8 flex-grow">
+          <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
+            <Suspense fallback={<ShimmerLoading />}>
+              {activeTab === "menu" && <MenuTab />}
+              {activeTab === "notices" && <NoticesTab />}
+              {activeTab === "feedback" && <FeedbackTab student={student} />}
+              {activeTab === "attendance" && (
+                <AttendanceTab getStudentFromStorage={getStudentFromStorage} />
+              )}
+            </Suspense>
+          </ErrorBoundary>
+        </main>
+
+        {/* Footer */}
+        <footer className="bg-gray-800 text-white py-6 mt-auto">
+          <div className="container mx-auto px-4 text-center">
+            <p>© {new Date().getFullYear()} Student Mess Management System</p>
+            <p className="text-gray-400 text-sm mt-1">Providing quality meals and service to students</p>
+          </div>
+        </footer>
       </div>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 flex-grow">
-        <Suspense fallback={<LoadingFallback />}>
-          {activeTab === "menu" && <MenuTab />}
-          {activeTab === "notices" && <NoticesTab />}
-          {activeTab === "feedback" && <FeedbackTab student={student} />}
-          {activeTab === "attendance" && (
-            <AttendanceTab student={student} getStudentFromStorage={getStudentFromStorage} />
-          )}
-        </Suspense>
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-6 mt-auto">
-        <div className="container mx-auto px-4 text-center">
-          <p>© {new Date().getFullYear()} Student Mess Management System</p>
-          <p className="text-gray-400 text-sm mt-1">Providing quality meals and service to students</p>
-        </div>
-      </footer>
-    </div>
+      {process.env.NODE_ENV === "development" && <ReactQueryDevtools initialIsOpen={false} />}
+    </QueryClientProvider>
   )
 }
 
 export default StudentPublic
-

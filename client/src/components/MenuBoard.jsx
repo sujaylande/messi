@@ -19,12 +19,16 @@
 
 import { useState } from "react"
 
-export function MenuBoard({ menu }) {
+function MenuBoard({ menu }) {
   const [selectedMealSlot, setSelectedMealSlot] = useState("All")
 
   const mealSlots = ["All", "Breakfast", "Lunch", "Snack", "Dinner"]
 
   const filteredMenu = selectedMealSlot === "All" ? menu : menu.filter((item) => item.meal_slot === selectedMealSlot)
+
+  // if(Math.random() > 0.5){
+  //   return new Error("Testing error boundary")
+  // }
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
@@ -104,3 +108,5 @@ export function MenuBoard({ menu }) {
     </div>
   )
 }
+
+export default MenuBoard

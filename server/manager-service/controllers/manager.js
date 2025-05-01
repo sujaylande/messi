@@ -209,7 +209,7 @@ module.exports.managerLogin = (req, res) => {
           mess_name: manager.mess_name,
         },
         process.env.JWT_SECRET,
-        { expiresIn: "1m" }
+        { expiresIn: "15m" }
       );
 
             const refreshToken = jwt.sign({
@@ -218,7 +218,7 @@ module.exports.managerLogin = (req, res) => {
               name: manager.name,
               role: manager.role,
               mess_name: manager.mess_name,
-            }, process.env.JWT_REFRESH_SECRET, { expiresIn: '2m' });
+            }, process.env.JWT_REFRESH_SECRET, { expiresIn: '1d' });
       
 
       // avoid naming conflict
@@ -237,15 +237,15 @@ module.exports.managerLogin = (req, res) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'Strict',
-        maxAge: 1 * 60 * 1000, // 15 min
+        maxAge: 15 * 60 * 1000, // 15 min
       });
 
       res.cookie('manager-refresh-token', refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'Strict',
-        // maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        maxAge: 2 * 60 * 1000, // 15 min
+        maxAge: 1 * 24 * 60 * 60 * 1000, // 1 days
+        // maxAge: 2 * 60 * 1000, // 15 min
 
       });
 
@@ -289,13 +289,13 @@ module.exports.refreshToken = (req, res) => {
         mess_name: decoded.mess_name,
       };
 
-      const newAccessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1m' });
+      const newAccessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '15m' });
 
       res.cookie('manager-token', newAccessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'Strict',
-        maxAge: 1 * 60 * 1000, // 15 min
+        maxAge: 15 * 60 * 1000, // 15 min
       });
 
       const newRefreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: '2m' });
@@ -304,7 +304,7 @@ module.exports.refreshToken = (req, res) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'Strict',
-        maxAge: 2 * 60 * 1000, // 15 min
+        maxAge: 1 * 24 * 60 * 60 * 1000, // 1 days
       });
 
       res.status(200).json({ message: 'Access token refreshed' });

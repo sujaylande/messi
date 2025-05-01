@@ -30,11 +30,16 @@
 
 "use client"
 
-import { useEffect, useState } from "react"
+import { lazy, useEffect, useState, Suspense } from "react"
 import axios from "axios"
-import { MenuForm } from "../components/MenuForm"
-import { MenuBoard } from "../components/MenuBoard"
+// import  MenuForm  from "../components/MenuForm"
+// import  MenuBoard  from "../components/MenuBoard"
 import managerAxios from "../api/managerAxios"
+import {ErrorBoundary} from "react-error-boundary"
+import ErrorFallback from "../utils/ErrorBoundary.jsx"
+
+const MenuForm = lazy(() => import("../components/MenuForm.jsx"));
+const MenuBoard = lazy(() => import("../components/MenuBoard.jsx"));
 
 axios.defaults.withCredentials = true
 
@@ -67,7 +72,13 @@ function Menu() {
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">Meal Management System</h1>
 
         <div className="grid md:grid-cols-2 gap-8">
-          <MenuForm fetchMenu={fetchMenu} />
+
+          <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
+            <Suspense fallback={<div>Loading...</div>}>
+              <MenuForm fetchMenu={fetchMenu} />
+            </Suspense>
+          </ErrorBoundary>
+          {/* <MenuForm fetchMenu={fetchMenu} /> */}
 
           {isLoading ? (
             <div className="flex justify-center items-center h-64">
@@ -76,7 +87,11 @@ function Menu() {
           ) : error ? (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{error}</div>
           ) : (
-            <MenuBoard menu={menu} />
+            <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
+            <Suspense fallback={<div>Loading...</div>}>
+              <MenuBoard menu={menu} />
+            </Suspense>
+          </ErrorBoundary>
           )}
         </div>
       </div>

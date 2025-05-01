@@ -1,38 +1,81 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+// import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import HomePage from "./pages/HomePage"
-import MessStatistics from "./components/MessStatistics "
-import StudentMessAttendance from "./components/StudentMessAttendance "
-import Scan from "./components/Scan"
-import Register from "./components/Register"
+// import MessStatistics from "./components/MessStatistics "
+// import StudentMessAttendance from "./components/StudentMessAttendance "
+// import Scan from "./components/Scan"
+// import Register from "./components/Register"
 import StudentPublic from "./pages/StudentPublic"
-import Menu from "./pages/Menu"
-import FeedbackInsights from "./pages/Feedback"
-import NoticeBoard from "./components/NoticeBoard"
+// import Menu from "./pages/Menu"
+// import FeedbackInsights from "./pages/Feedback"
+// import NoticeBoard from "./components/NoticeBoard"
 import ManagerLogin from "./pages/ManagerLogin"
 import ManagerProtectWrapper from './pages/ManagerProtectWrapper'
 import StudentProtectWrapper from './pages/StudentProtectWrapper'
 import StudentLogin from "./pages/StudentLogin"
 
+// function App() {
+//   return (
+//     <Router>
+//       <Routes>
+//         <Route path="/homepage" element={<ManagerProtectWrapper><HomePage /></ManagerProtectWrapper>} />
+//         <Route path="/mess-stat" element={<ManagerProtectWrapper><MessStatistics/></ManagerProtectWrapper>} />
+//         <Route path="/student-stat" element={<ManagerProtectWrapper><StudentMessAttendance/></ManagerProtectWrapper>} />
+//         <Route path="/scan" element={<ManagerProtectWrapper><Scan/></ManagerProtectWrapper>} />
+//         <Route path="/register" element={<ManagerProtectWrapper><Register/></ManagerProtectWrapper>} />
+//         <Route path="/student-public" element={<StudentProtectWrapper><StudentPublic/></StudentProtectWrapper>} />
+//         <Route path="/menu" element={<ManagerProtectWrapper><Menu/></ManagerProtectWrapper>} />
+//         <Route path="/feedback" element={<ManagerProtectWrapper><FeedbackInsights/></ManagerProtectWrapper>} />
+//         <Route path="/notice-board" element={<ManagerProtectWrapper><NoticeBoard/></ManagerProtectWrapper>} />
+//         <Route path="/manager/login" element={<ManagerLogin/>} />
+//         <Route path="/" element={<StudentLogin/>} />
+//         <Route path="*" element={<h1>Not Found</h1>} />
+//       </Routes>
+//     </Router>
+//   )
+// }
+
+// export default App
+
+import React, { lazy, Suspense } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+// const HomePage = lazy(() => import("./pages/HomePage.jsx"));
+const MessStatistics = lazy(() => import("./components/MessStatistics.jsx"));
+const StudentMessAttendance = lazy(() => import("./components/StudentMessAttendance.jsx"));
+const Scan = lazy(() => import("./components/Scan.jsx"));
+const Register = lazy(() => import("./components/Register.jsx"));
+// const StudentPublic = lazy(() => import("./pages/StudentPublic.jsx"));
+const Menu = lazy(() => import("./pages/Menu.jsx"));
+const FeedbackInsights = lazy(() => import("./pages/Feedback.jsx"));
+const NoticeBoard = lazy(() => import("./components/NoticeBoard.jsx"));
+// const ManagerLogin = lazy(() => import("./pages/ManagerLogin.jsx"));
+// const StudentLogin = lazy(() => import("./pages/StudentLogin.jsx"));
+// const ManagerProtectWrapper = lazy(() => import("./pages/ManagerProtectWrapper.jsx"));
+// const StudentProtectWrapper = lazy(() => import("./pages/StudentProtectWrapper.jsx"));
+
+
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/homepage" element={<ManagerProtectWrapper><HomePage /></ManagerProtectWrapper>} />
-        <Route path="/mess-stat" element={<ManagerProtectWrapper><MessStatistics/></ManagerProtectWrapper>} />
-        <Route path="/student-stat" element={<ManagerProtectWrapper><StudentMessAttendance/></ManagerProtectWrapper>} />
-        <Route path="/scan" element={<ManagerProtectWrapper><Scan/></ManagerProtectWrapper>} />
-        <Route path="/register" element={<ManagerProtectWrapper><Register/></ManagerProtectWrapper>} />
-        <Route path="/student-public" element={<StudentProtectWrapper><StudentPublic/></StudentProtectWrapper>} />
-        <Route path="/menu" element={<ManagerProtectWrapper><Menu/></ManagerProtectWrapper>} />
-        <Route path="/feedback" element={<ManagerProtectWrapper><FeedbackInsights/></ManagerProtectWrapper>} />
-        <Route path="/notice-board" element={<ManagerProtectWrapper><NoticeBoard/></ManagerProtectWrapper>} />
-        <Route path="/manager/login" element={<ManagerLogin/>} />
-        <Route path="/" element={<StudentLogin/>} />
-        <Route path="*" element={<h1>Not Found</h1>} />
-      </Routes>
+      <Suspense fallback={<div>Loading...</div>}>
+        <Routes>
+          <Route path="/homepage" element={<ManagerProtectWrapper><HomePage /></ManagerProtectWrapper>} />
+          <Route path="/mess-stat" element={<ManagerProtectWrapper><MessStatistics/></ManagerProtectWrapper>} />
+          <Route path="/student-stat" element={<ManagerProtectWrapper><StudentMessAttendance/></ManagerProtectWrapper>} />
+          <Route path="/scan" element={<ManagerProtectWrapper><Scan/></ManagerProtectWrapper>} />
+          <Route path="/register" element={<ManagerProtectWrapper><Register/></ManagerProtectWrapper>} />
+          <Route path="/student-public" element={<StudentProtectWrapper><StudentPublic/></StudentProtectWrapper>} />
+          <Route path="/menu" element={<ManagerProtectWrapper><Menu/></ManagerProtectWrapper>} />
+          <Route path="/feedback" element={<ManagerProtectWrapper><FeedbackInsights/></ManagerProtectWrapper>} />
+          <Route path="/notice-board" element={<ManagerProtectWrapper><NoticeBoard/></ManagerProtectWrapper>} />
+          <Route path="/manager/login" element={<ManagerLogin />} />
+          <Route path="/" element={<StudentLogin />} />
+          <Route path="*" element={<h1>Not Found</h1>} />
+        </Routes>
+      </Suspense>
     </Router>
-  )
+  );
 }
 
-export default App
 
+export default App

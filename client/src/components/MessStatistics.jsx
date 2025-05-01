@@ -124,9 +124,6 @@ const MessStatistics = () => {
     return "same"
   }
 
-  // // Function to export table data as CSV
-
-
   // Get today's date in a readable format
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -202,13 +199,7 @@ const MessStatistics = () => {
                 <Bell className="mr-1 h-4 w-4" />
                 Notice Board
               </Link>
-              {/* <Link
-                to="/student-stat"
-                className="flex items-center text-blue-700 bg-blue-50 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                <Users className="mr-1 h-4 w-4" />
-                Student Statistics
-              </Link> */}
+              
             </div>
 
             {/* Mobile menu button */}
@@ -255,13 +246,7 @@ const MessStatistics = () => {
                 <Bell className="mr-2 h-5 w-5" />
                 Notice Board
               </Link>
-              {/* <Link
-                to="/student-stat"
-                className="flex items-center text-blue-700 bg-blue-50 block px-3 py-2 rounded-md text-base font-medium"
-              >
-                <Users className="mr-2 h-5 w-5" />
-                Student Statistics
-              </Link> */}
+              
             </div>
           </div>
         )}
@@ -411,7 +396,7 @@ const MessStatistics = () => {
                       placeholder="Search students..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-8 pr-4 py-1 rounded-md border-0 focus:ring-2 focus:ring-blue-300 text-sm"
+                      className="pl-8 pr-4 py-1 rounded-md border-0 bg-white focus:ring-2 focus:ring-blue-300 text-sm"
                     />
                     <Search className="absolute left-2 top-1.5 h-4 w-4 text-gray-400" />
                   </div>
