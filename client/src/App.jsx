@@ -39,6 +39,47 @@ import StudentLogin from "./pages/StudentLogin"
 import React, { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+import "./index.css"
+
+
+const LoadingFallback = () => (
+  <div className="min-h-screen bg-gray-50 p-4">
+    <div className="max-w-7xl mx-auto">
+      {/* Header shimmer */}
+      <div className="mb-8">
+        <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-2"></div>
+        <div className="h-4 w-64 bg-gray-200 rounded animate-pulse"></div>
+      </div>
+
+      {/* Content shimmer */}
+      <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+        <div className="h-12 bg-gray-200 animate-pulse"></div>
+        <div className="p-4 space-y-4">
+          {Array(5)
+            .fill(0)
+            .map((_, i) => (
+              <div key={i} className="h-8 bg-gray-200 rounded animate-pulse"></div>
+            ))}
+        </div>
+      </div>
+    </div>
+  </div>
+)
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+})
+
 // const HomePage = lazy(() => import("./pages/HomePage.jsx"));
 const MessStatistics = lazy(() => import("./components/MessStatistics.jsx"));
 const StudentMessAttendance = lazy(() => import("./components/StudentMessAttendance.jsx"));
@@ -56,8 +97,10 @@ const NoticeBoard = lazy(() => import("./components/NoticeBoard.jsx"));
 
 function App() {
   return (
+    <QueryClientProvider client={queryClient}>
+
     <Router>
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<LoadingFallback />}>
         <Routes>
           <Route path="/homepage" element={<ManagerProtectWrapper><HomePage /></ManagerProtectWrapper>} />
           <Route path="/mess-stat" element={<ManagerProtectWrapper><MessStatistics/></ManagerProtectWrapper>} />
@@ -74,6 +117,8 @@ function App() {
         </Routes>
       </Suspense>
     </Router>
+    {process.env.NODE_ENV === "development" && <ReactQueryDevtools initialIsOpen={false} />}
+    </QueryClientProvider>
   );
 }
 

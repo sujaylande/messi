@@ -34,7 +34,7 @@ async function connectRabbitMQ() {
           [notice.notice, notice.block_no],
           (err) => {
             if (err) console.error("Error inserting notice:", err.message);
-            // else console.log("✅ Notice saved in Student Database.");
+            else console.log("✅ Notice saved in Student Database.");
           }
         );
 

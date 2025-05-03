@@ -1,172 +1,535 @@
-"use client";
+// "use client";
 
-import { useContext, useEffect, useState } from "react";
-import axios from "axios";
-import { Link, Navigate, useNavigate } from "react-router-dom";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
-import { ScanLine, UserPlus } from "lucide-react";
-import { ManagerDataContext } from "../context/ManagerContext";
-import managerAxios from '../api/managerAxios'
+// import { useContext, useEffect, useState } from "react";
+// import axios from "axios";
+// import { Link, Navigate, useNavigate } from "react-router-dom";
+// import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
+// import { ScanLine, UserPlus } from "lucide-react";
+// import { ManagerDataContext } from "../context/ManagerContext";
+// import managerAxios from '../api/managerAxios'
 
+
+// const HomePage = () => {
+//   const [studentStats, setStudentStats] = useState({ active: 0, inactive: 0 });
+//   const [attendanceToday, setAttendanceToday] = useState([]);
+//   const [forecast, setForecast] = useState({});
+//   const [loading, setLoading] = useState(true);
+//   const { manager, setManager } = useContext(ManagerDataContext);
+//   const navigate = useNavigate();
+
+//   console.log("home", manager);
+
+//   const fetchStudentStats = async () => {
+//     try {
+//       const { data } = await managerAxios.get(
+//         "/active-student"
+//       );
+//       setStudentStats(data);
+//     } catch (error) {
+//       console.error("Error fetching student stats:", error);
+//     }
+//   };
+
+//   const fetchAttendanceToday = async () => {
+//     try {
+//       const { data } = await managerAxios.get(
+//         "/todays-attendance"
+//       );
+//       setAttendanceToday(data);
+//     } catch (error) {
+//       console.error("Error fetching today's attendance:", error);
+//     }
+//   };
+
+//   const fetchForecast = async () => {
+//     try {
+//       const { data } = await managerAxios.get(
+//         "/attendance-probability"
+//       );
+//       setForecast(data);
+//     } catch (error) {
+//       console.error("Error fetching forecast:", error);
+//     }
+//   };
+
+//   useEffect(() => {
+//     const fetchData = async () => {
+//       setLoading(true);
+//       await Promise.all([
+//         fetchStudentStats(),
+//         fetchAttendanceToday(),
+//         fetchForecast(),
+//       ]);
+//       setLoading(false);
+//     };
+
+//     fetchData();
+//   }, []);
+
+//   const getNext7Days = () => {
+//     const daysOfWeek = [
+//       "Sunday",
+//       "Monday",
+//       "Tuesday",
+//       "Wednesday",
+//       "Thursday",
+//       "Friday",
+//       "Saturday",
+//     ];
+//     const todayIndex = new Date().getDay();
+
+//     return [
+//       ...daysOfWeek.slice(todayIndex),
+//       ...daysOfWeek.slice(0, todayIndex),
+//     ].slice(0, 7);
+//   };
+
+//   const renderForecastTable = () => {
+//     const meals = ["Breakfast", "Lunch", "Snack", "Dinner"];
+
+//     return meals.map((meal) => (
+//       <tr key={meal}>
+//         <td className="px-4 py-2 border-b font-medium">{meal}</td>
+//         {forecast[meal]?.slice(0, 7).map((value, index) => (
+//           <td key={index} className="px-4 py-2 border-b text-center">
+//             {Math.round(value) > 0 ? Math.round(value) : 0}
+//           </td>
+//         ))}
+//       </tr>
+//     ));
+//   };
+
+//   // Data for pie chart
+//   const pieData = [
+//     { name: "Active", value: studentStats.active, color: "#10b981" },
+//     { name: "Inactive", value: studentStats.inactive, color: "#ef4444" },
+//   ];
+
+//   const totalStudents = studentStats.active + studentStats.inactive;
+
+//   const handleLogout = async () => {
+//     try {
+//       await managerAxios.get(
+//         "/logout",
+//         {},
+//         {
+//           withCredentials: true,
+//         }
+//       );
+
+//       // Clear student context
+//       setManager(null);
+
+//       // Optional: remove any localStorage data related to student
+//       localStorage.removeItem("student-data");
+
+//       // Redirect to login/home
+//       navigate("/manager/login");
+//     } catch (error) {
+//       console.error(
+//         "Logout failed:",
+//         error.response?.data?.message || error.message
+//       );
+//       alert("Logout failed. Please try again.");
+//     }
+//   };
+
+//   return (
+//     <div className="min-h-screen bg-gray-50">
+    
+//       <nav className="bg-white shadow-sm border-b">
+//         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+//           <div className="flex justify-between h-16 mb-2 mt-2">
+//             <div className="flex flex-col justify-center">
+//               <h1 className="text-xl font-bold text-gray-900">
+//                 {manager?.mess_name}
+//               </h1>
+//               <div className="text-sm text-gray-700 mb-1">
+//                 <p>Block Number: {manager?.block_no}</p>
+//                 <p>Manager Name: {manager?.name}</p>
+//               </div>
+//             </div>
+//             <div className="flex items-center space-x-4">
+//               <Link
+//                 to="/mess-stat"
+//                 className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+//               >
+//                 Mess Statistics
+//               </Link>
+
+//               <button
+//                 onClick={handleLogout}
+//                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+//               >
+//                 Logout
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       </nav>
+
+//       {/* Main Content */}
+//       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+//         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+//           {/* Left Column - Actions and Stats */}
+//           <div className="space-y-8">
+//             {/* Action Buttons */}
+//             <div className="space-y-4">
+//               <Link
+//                 to="/scan"
+//                 className="w-full py-6 text-lg flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md"
+//               >
+//                 <ScanLine className="mr-2 h-5 w-5" />
+//                 Scan a Student
+//               </Link>
+
+//               <Link
+//                 to="/register"
+//                 className="w-full py-6 text-lg flex items-center justify-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-md"
+//               >
+//                 <UserPlus className="mr-2 h-5 w-5" />
+//                 Register a Student
+//               </Link>
+//             </div>
+
+//             {/* Student Stats Card with Pie Chart */}
+//             <div className="bg-white rounded-lg shadow-md overflow-hidden">
+//               <div className="px-4 py-5 sm:px-6 border-b">
+//                 <h3 className="text-lg font-medium text-gray-900">
+//                   Student Statistics
+//                 </h3>
+//               </div>
+
+//               <div className="px-4 py-5 sm:p-6">
+//                 <div className="h-64">
+//                   <ResponsiveContainer width="100%" height="100%">
+//                     <PieChart>
+//                       <Pie
+//                         data={pieData}
+//                         cx="50%"
+//                         cy="50%"
+//                         innerRadius={60}
+//                         outerRadius={80}
+//                         paddingAngle={5}
+//                         dataKey="value"
+//                         label={({ name, percent }) =>
+//                           `${name}: ${(percent * 100).toFixed(0)}%`
+//                         }
+//                       >
+//                         {pieData.map((entry, index) => (
+//                           <Cell key={`cell-${index}`} fill={entry.color} />
+//                         ))}
+//                       </Pie>
+//                       <Legend />
+//                     </PieChart>
+//                   </ResponsiveContainer>
+//                 </div>
+//                 <div className="mt-4 grid grid-cols-2 gap-4 text-center">
+//                   <div className="bg-green-50 p-3 rounded-lg">
+//                     <p className="text-sm text-gray-500">Active</p>
+//                     <p className="text-2xl font-bold text-green-600">
+//                       {studentStats.active}
+//                     </p>
+//                   </div>
+//                   <div className="bg-red-50 p-3 rounded-lg">
+//                     <p className="text-sm text-gray-500">Inactive</p>
+//                     <p className="text-2xl font-bold text-red-600">
+//                       {studentStats.inactive}
+//                     </p>
+//                   </div>
+//                   <div className="col-span-2 bg-blue-50 p-3 rounded-lg">
+//                     <p className="text-sm text-gray-500">Total Students</p>
+//                     <p className="text-2xl font-bold text-blue-600">
+//                       {totalStudents}
+//                     </p>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* Right Column - Tables */}
+//           <div className="lg:col-span-2 space-y-8">
+//             {/* Today's Attendance */}
+//             <div className="bg-white rounded-lg shadow-md overflow-hidden">
+//               <div className="px-4 py-5 sm:px-6 border-b">
+//                 <h3 className="text-lg font-medium text-gray-900">
+//                   Today's Attendance
+//                 </h3>
+//               </div>
+//               <div className="px-4 py-5 sm:p-6">
+//                 {loading ? (
+//                   <div className="flex justify-center items-center h-32">
+//                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+//                   </div>
+//                 ) : attendanceToday.length > 0 ? (
+//                   <div className="overflow-x-auto">
+//                     <table className="min-w-full divide-y divide-gray-200">
+//                       <thead className="bg-gray-50">
+//                         <tr>
+//                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                             Breakfast
+//                           </th>
+//                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                             Lunch
+//                           </th>
+//                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                             Snack
+//                           </th>
+//                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                             Dinner
+//                           </th>
+//                         </tr>
+//                       </thead>
+//                       <tbody className="bg-white divide-y divide-gray-200">
+//                         {attendanceToday.map((row, index) => (
+//                           <tr key={index}>
+//                             <td className="px-4 py-2 whitespace-nowrap">
+//                               {row.breakfast}
+//                             </td>
+//                             <td className="px-4 py-2 whitespace-nowrap">
+//                               {row.lunch}
+//                             </td>
+//                             <td className="px-4 py-2 whitespace-nowrap">
+//                               {row.snack}
+//                             </td>
+//                             <td className="px-4 py-2 whitespace-nowrap">
+//                               {row.dinner}
+//                             </td>
+//                           </tr>
+//                         ))}
+//                       </tbody>
+//                     </table>
+//                   </div>
+//                 ) : (
+//                   <p className="text-center text-gray-500 py-4">
+//                     No attendance data available for today
+//                   </p>
+//                 )}
+//               </div>
+//             </div>
+
+//             {/* Predicted Attendance */}
+//             <div className="bg-white rounded-lg shadow-md overflow-hidden">
+//               <div className="px-4 py-5 sm:px-6 border-b">
+//                 <h3 className="text-lg font-medium text-gray-900">
+//                   Predicted Attendance for next seven days
+//                 </h3>
+//               </div>
+//               <div className="px-4 py-5 sm:p-6">
+//                 {loading ? (
+//                   <div className="flex justify-center items-center h-32">
+//                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+//                   </div>
+//                 ) : Object.keys(forecast).length > 0 ? (
+//                   <div className="overflow-x-auto">
+//                     <table className="min-w-full divide-y divide-gray-200">
+//                       <thead className="bg-gray-50">
+//                         <tr>
+//                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                             Meal
+//                           </th>
+//                           {getNext7Days().map((day, index) => (
+//                             <th
+//                               key={index}
+//                               className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+//                             >
+//                               {day}
+//                             </th>
+//                           ))}
+//                         </tr>
+//                       </thead>
+//                       <tbody className="bg-white divide-y divide-gray-200">
+//                         {renderForecastTable()}
+//                       </tbody>
+//                     </table>
+//                   </div>
+//                 ) : (
+//                   <p className="text-center text-gray-500 py-4">
+//                     No forecast data available
+//                   </p>
+//                 )}
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default HomePage; //orignal
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"use client"
+
+import React, { useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts"
+import {
+  ScanLine,
+  UserPlus,
+  Users,
+  Coffee,
+  Utensils,
+  Cookie,
+  Moon,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react"
+import Navbar from "../components/Navbar"
+import managerAxios from "../api/managerAxios"
+
+// Lazy loaded components
+const LazyAttendanceTable = React.lazy(() => import("../components/AttendanceTableHome"))
+const LazyForecastTable = React.lazy(() => import("../components/ForecastTable"))
 
 const HomePage = () => {
-  const [studentStats, setStudentStats] = useState({ active: 0, inactive: 0 });
-  const [attendanceToday, setAttendanceToday] = useState([]);
-  const [forecast, setForecast] = useState({});
-  const [loading, setLoading] = useState(true);
-  const { manager, setManager } = useContext(ManagerDataContext);
-  const navigate = useNavigate();
+  const [sortConfig, setSortConfig] = useState({
+    key: "formatted_date",
+    direction: "descending",
+  })
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
-  console.log("home", manager);
+  // React Query for data fetching with caching
+  const { data: manager } = useQuery({
+    queryKey: ["manager"],
+    queryFn: async () => {
+      const storedData = localStorage.getItem("student-data")
+      return storedData ? JSON.parse(storedData) : null
+    },
+  })
 
-  const fetchStudentStats = async () => {
+  const { data: studentStats = { active: 0, inactive: 0 }, isLoading: statsLoading } = useQuery({
+    queryKey: ["studentStats"],
+    queryFn: async () => {
+      const { data } = await managerAxios.get("/active-student")
+      return data
+    },
+    staleTime: 2 * 60 * 1000, // 5 minutes
+  })
+
+  const { data: attendanceToday = [], isLoading: attendanceLoading } = useQuery({
+    queryKey: ["attendanceToday"],
+    queryFn: async () => {
+      const { data } = await managerAxios.get("/todays-attendance")
+      return data
+    },
+    staleTime: 2 * 60 * 1000, // 30 minutes
+  })
+
+  const { data: forecast = {}, isLoading: forecastLoading } = useQuery({
+    queryKey: ["forecast"],
+    queryFn: async () => {
+      const { data } = await managerAxios.get("/attendance-probability")
+      return data
+    },
+    staleTime: 60 * 60 * 1000, // 1 hour
+  })
+
+  const handleLogout = async () => {
     try {
-      const { data } = await managerAxios.get(
-        "/active-student"
-      );
-      setStudentStats(data);
+      await managerAxios.get("/logout", {}, { withCredentials: true })
+      queryClient.clear() // Clear all queries from cache
+      localStorage.removeItem("student-data")
+      navigate("/manager/login")
     } catch (error) {
-      console.error("Error fetching student stats:", error);
+      console.error("Logout failed:", error.response?.data?.message || error.message)
+      alert("Logout failed. Please try again.")
     }
-  };
-
-  const fetchAttendanceToday = async () => {
-    try {
-      const { data } = await managerAxios.get(
-        "/todays-attendance"
-      );
-      setAttendanceToday(data);
-    } catch (error) {
-      console.error("Error fetching today's attendance:", error);
-    }
-  };
-
-  const fetchForecast = async () => {
-    try {
-      const { data } = await managerAxios.get(
-        "/attendance-probability"
-      );
-      setForecast(data);
-    } catch (error) {
-      console.error("Error fetching forecast:", error);
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      await Promise.all([
-        fetchStudentStats(),
-        fetchAttendanceToday(),
-        fetchForecast(),
-      ]);
-      setLoading(false);
-    };
-
-    fetchData();
-  }, []);
-
-  const getNext7Days = () => {
-    const daysOfWeek = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
-    const todayIndex = new Date().getDay();
-
-    return [
-      ...daysOfWeek.slice(todayIndex),
-      ...daysOfWeek.slice(0, todayIndex),
-    ].slice(0, 7);
-  };
-
-  const renderForecastTable = () => {
-    const meals = ["Breakfast", "Lunch", "Snack", "Dinner"];
-
-    return meals.map((meal) => (
-      <tr key={meal}>
-        <td className="px-4 py-2 border-b font-medium">{meal}</td>
-        {forecast[meal]?.slice(0, 7).map((value, index) => (
-          <td key={index} className="px-4 py-2 border-b text-center">
-            {Math.round(value) > 0 ? Math.round(value) : 0}
-          </td>
-        ))}
-      </tr>
-    ));
-  };
+  }
 
   // Data for pie chart
   const pieData = [
     { name: "Active", value: studentStats.active, color: "#10b981" },
     { name: "Inactive", value: studentStats.inactive, color: "#ef4444" },
-  ];
+  ]
 
-  const totalStudents = studentStats.active + studentStats.inactive;
+  const totalStudents = studentStats.active + studentStats.inactive
 
-  const handleLogout = async () => {
-    try {
-      await managerAxios.get(
-        "/logout",
-        {},
-        {
-          withCredentials: true,
-        }
-      );
-
-      // Clear student context
-      setManager(null);
-
-      // Optional: remove any localStorage data related to student
-      localStorage.removeItem("student-data");
-
-      // Redirect to login/home
-      navigate("/manager/login");
-    } catch (error) {
-      console.error(
-        "Logout failed:",
-        error.response?.data?.message || error.message
-      );
-      alert("Logout failed. Please try again.");
+  // Sort function for tables
+  const requestSort = (key) => {
+    let direction = "ascending"
+    if (sortConfig.key === key && sortConfig.direction === "ascending") {
+      direction = "descending"
     }
-  };
+    setSortConfig({ key, direction })
+  }
+
+  const getSortedData = (data) => {
+    if (!data || data.length === 0) return []
+
+    const sortableData = [...data]
+    sortableData.sort((a, b) => {
+      if (a[sortConfig.key] < b[sortConfig.key]) {
+        return sortConfig.direction === "ascending" ? -1 : 1
+      }
+      if (a[sortConfig.key] > b[sortConfig.key]) {
+        return sortConfig.direction === "ascending" ? 1 : -1
+      }
+      return 0
+    })
+    return sortableData
+  }
+
+  // Calculate trend for attendance
+  const calculateTrend = (index, mealType) => {
+    if (index >= attendanceToday.length - 1) return "neutral"
+
+    const current = attendanceToday[index][`${mealType}_count`]
+    const previous = attendanceToday[index + 1][`${mealType}_count`]
+
+    if (current > previous) return "up"
+    if (current < previous) return "down"
+    return "neutral"
+  }
+
+  // Render trend indicator
+  const renderTrendIndicator = (trend) => {
+    if (trend === "up") return <TrendingUp className="inline h-3 w-3 ml-1 text-green-600" />
+    if (trend === "down") return <TrendingDown className="inline h-3 w-3 ml-1 text-red-600" />
+    return <Minus className="inline h-3 w-3 ml-1 text-gray-400" />
+  }
+
+  // Get meal icon
+  const getMealIcon = (meal) => {
+    switch (meal) {
+      case "breakfast":
+        return <Coffee className="inline h-4 w-4 mr-1" />
+      case "lunch":
+        return <Utensils className="inline h-4 w-4 mr-1" />
+      case "snack":
+        return <Cookie className="inline h-4 w-4 mr-1" />
+      case "dinner":
+        return <Moon className="inline h-4 w-4 mr-1" />
+      default:
+        return null
+    }
+  }
+
+  const isLoading = statsLoading || attendanceLoading || forecastLoading
 
   return (
     <div className="min-h-screen bg-gray-50">
-    
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 mb-2 mt-2">
-            <div className="flex flex-col justify-center">
-              <h1 className="text-xl font-bold text-gray-900">
-                {manager?.mess_name}
-              </h1>
-              <div className="text-sm text-gray-700 mb-1">
-                <p>Block Number: {manager?.block_no}</p>
-                <p>Manager Name: {manager?.name}</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link
-                to="/mess-stat"
-                className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Mess Statistics
-              </Link>
-
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar manager={manager} onLogout={handleLogout} />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -174,10 +537,10 @@ const HomePage = () => {
           {/* Left Column - Actions and Stats */}
           <div className="space-y-8">
             {/* Action Buttons */}
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
               <Link
                 to="/scan"
-                className="w-full py-6 text-lg flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md"
+                className="py-6 text-lg flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md transition-all duration-200"
               >
                 <ScanLine className="mr-2 h-5 w-5" />
                 Scan a Student
@@ -185,7 +548,7 @@ const HomePage = () => {
 
               <Link
                 to="/register"
-                className="w-full py-6 text-lg flex items-center justify-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-md"
+                className="py-6 text-lg flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-lg shadow-md transition-all duration-200"
               >
                 <UserPlus className="mr-2 h-5 w-5" />
                 Register a Student
@@ -194,56 +557,57 @@ const HomePage = () => {
 
             {/* Student Stats Card with Pie Chart */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="px-4 py-5 sm:px-6 border-b">
-                <h3 className="text-lg font-medium text-gray-900">
+              <div className="px-6 py-4 bg-gradient-to-r from-gray-700 to-gray-800">
+                <h3 className="text-lg font-medium text-white flex items-center">
+                  <Users className="mr-2 h-5 w-5" />
                   Student Statistics
                 </h3>
               </div>
 
               <div className="px-4 py-5 sm:p-6">
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={80}
-                        paddingAngle={5}
-                        dataKey="value"
-                        label={({ name, percent }) =>
-                          `${name}: ${(percent * 100).toFixed(0)}%`
-                        }
-                      >
-                        {pieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="mt-4 grid grid-cols-2 gap-4 text-center">
-                  <div className="bg-green-50 p-3 rounded-lg">
-                    <p className="text-sm text-gray-500">Active</p>
-                    <p className="text-2xl font-bold text-green-600">
-                      {studentStats.active}
-                    </p>
+                {isLoading ? (
+                  <div className="flex justify-center items-center h-64">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                   </div>
-                  <div className="bg-red-50 p-3 rounded-lg">
-                    <p className="text-sm text-gray-500">Inactive</p>
-                    <p className="text-2xl font-bold text-red-600">
-                      {studentStats.inactive}
-                    </p>
-                  </div>
-                  <div className="col-span-2 bg-blue-50 p-3 rounded-lg">
-                    <p className="text-sm text-gray-500">Total Students</p>
-                    <p className="text-2xl font-bold text-blue-600">
-                      {totalStudents}
-                    </p>
-                  </div>
-                </div>
+                ) : (
+                  <>
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={pieData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={80}
+                            paddingAngle={5}
+                            dataKey="value"
+                            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                          >
+                            {pieData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="mt-4 grid grid-cols-2 gap-4 text-center">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-sm text-gray-500">Active</p>
+                        <p className="text-2xl font-bold text-green-600">{studentStats.active}</p>
+                      </div>
+                      <div className="bg-red-50 p-3 rounded-lg">
+                        <p className="text-sm text-gray-500">Inactive</p>
+                        <p className="text-2xl font-bold text-red-600">{studentStats.inactive}</p>
+                      </div>
+                      <div className="col-span-2 bg-blue-50 p-3 rounded-lg">
+                        <p className="text-sm text-gray-500">Total Students</p>
+                        <p className="text-2xl font-bold text-blue-600">{totalStudents}</p>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -252,113 +616,218 @@ const HomePage = () => {
           <div className="lg:col-span-2 space-y-8">
             {/* Today's Attendance */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="px-4 py-5 sm:px-6 border-b">
-                <h3 className="text-lg font-medium text-gray-900">
+              <div className="px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600">
+                <h2 className="text-xl font-bold text-white flex items-center">
+                  <Users className="mr-2 h-5 w-5" />
                   Today's Attendance
-                </h3>
+                </h2>
               </div>
-              <div className="px-4 py-5 sm:p-6">
-                {loading ? (
-                  <div className="flex justify-center items-center h-32">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  </div>
-                ) : attendanceToday.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
+              <div className="overflow-x-auto">
+                <React.Suspense
+                  fallback={
+                    <div className="flex justify-center items-center h-32">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    </div>
+                  }
+                >
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-gray-100 text-gray-600 text-sm leading-normal">
+                        <th
+                          className="py-3 px-6 text-left cursor-pointer"
+                          onClick={() => requestSort("formatted_date")}
+                        >
+                          <div className="flex items-center">
+                            Date
+                            {sortConfig.key === "formatted_date" &&
+                              (sortConfig.direction === "ascending" ? (
+                                <ChevronUp size={16} />
+                              ) : (
+                                <ChevronDown size={16} />
+                              ))}
+                          </div>
+                        </th>
+                        <th
+                          className="py-3 px-6 text-center cursor-pointer"
+                          onClick={() => requestSort("breakfast_count")}
+                        >
+                          <div className="flex items-center justify-center">
+                            {getMealIcon("breakfast")} Breakfast
+                            {sortConfig.key === "breakfast_count" &&
+                              (sortConfig.direction === "ascending" ? (
+                                <ChevronUp size={16} />
+                              ) : (
+                                <ChevronDown size={16} />
+                              ))}
+                          </div>
+                        </th>
+                        <th className="py-3 px-6 text-center cursor-pointer" onClick={() => requestSort("lunch_count")}>
+                          <div className="flex items-center justify-center">
+                            {getMealIcon("lunch")} Lunch
+                            {sortConfig.key === "lunch_count" &&
+                              (sortConfig.direction === "ascending" ? (
+                                <ChevronUp size={16} />
+                              ) : (
+                                <ChevronDown size={16} />
+                              ))}
+                          </div>
+                        </th>
+                        <th className="py-3 px-6 text-center cursor-pointer" onClick={() => requestSort("snack_count")}>
+                          <div className="flex items-center justify-center">
+                            {getMealIcon("snack")} Snack
+                            {sortConfig.key === "snack_count" &&
+                              (sortConfig.direction === "ascending" ? (
+                                <ChevronUp size={16} />
+                              ) : (
+                                <ChevronDown size={16} />
+                              ))}
+                          </div>
+                        </th>
+                        <th
+                          className="py-3 px-6 text-center cursor-pointer"
+                          onClick={() => requestSort("dinner_count")}
+                        >
+                          <div className="flex items-center justify-center">
+                            {getMealIcon("dinner")} Dinner
+                            {sortConfig.key === "dinner_count" &&
+                              (sortConfig.direction === "ascending" ? (
+                                <ChevronUp size={16} />
+                              ) : (
+                                <ChevronDown size={16} />
+                              ))}
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-gray-600 text-sm">
+                      {isLoading ? (
                         <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Breakfast
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Lunch
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Snack
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Dinner
-                          </th>
+                          <td colSpan={5} className="py-4 text-center">
+                            Loading...
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {attendanceToday.map((row, index) => (
-                          <tr key={index}>
-                            <td className="px-4 py-2 whitespace-nowrap">
-                              {row.breakfast}
+                      ) : attendanceToday.length > 0 ? (
+                        getSortedData(attendanceToday).map((row, index) => (
+                          <tr key={index} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                            <td className="py-3 px-6 text-left whitespace-nowrap font-medium">{row.formatted_date}</td>
+                            <td className="py-3 px-6 text-center">
+                              <span className="bg-blue-100 text-blue-800 py-1 px-3 rounded-full text-xs">
+                                {row.breakfast_count} {renderTrendIndicator(calculateTrend(index, "breakfast"))}
+                              </span>
                             </td>
-                            <td className="px-4 py-2 whitespace-nowrap">
-                              {row.lunch}
+                            <td className="py-3 px-6 text-center">
+                              <span className="bg-green-100 text-green-800 py-1 px-3 rounded-full text-xs">
+                                {row.lunch_count} {renderTrendIndicator(calculateTrend(index, "lunch"))}
+                              </span>
                             </td>
-                            <td className="px-4 py-2 whitespace-nowrap">
-                              {row.snack}
+                            <td className="py-3 px-6 text-center">
+                              <span className="bg-yellow-100 text-yellow-800 py-1 px-3 rounded-full text-xs">
+                                {row.snack_count} {renderTrendIndicator(calculateTrend(index, "snack"))}
+                              </span>
                             </td>
-                            <td className="px-4 py-2 whitespace-nowrap">
-                              {row.dinner}
+                            <td className="py-3 px-6 text-center">
+                              <span className="bg-purple-100 text-purple-800 py-1 px-3 rounded-full text-xs">
+                                {row.dinner_count} {renderTrendIndicator(calculateTrend(index, "dinner"))}
+                              </span>
                             </td>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <p className="text-center text-gray-500 py-4">
-                    No attendance data available for today
-                  </p>
-                )}
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={5} className="py-4 text-center">
+                            No attendance data available for today
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </React.Suspense>
               </div>
             </div>
 
             {/* Predicted Attendance */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="px-4 py-5 sm:px-6 border-b">
-                <h3 className="text-lg font-medium text-gray-900">
-                  Predicted Attendance for next seven days
-                </h3>
+              <div className="px-6 py-4 bg-gradient-to-r from-purple-500 to-purple-600">
+                <h2 className="text-xl font-bold text-white flex items-center">
+                  <TrendingUp className="mr-2 h-5 w-5" />
+                  Predicted Attendance
+                </h2>
               </div>
-              <div className="px-4 py-5 sm:p-6">
-                {loading ? (
-                  <div className="flex justify-center items-center h-32">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  </div>
-                ) : Object.keys(forecast).length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Meal
-                          </th>
+              <div className="overflow-x-auto">
+                <React.Suspense
+                  fallback={
+                    <div className="flex justify-center items-center h-32">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                    </div>
+                  }
+                >
+                  {isLoading ? (
+                    <div className="flex justify-center items-center h-32">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                    </div>
+                  ) : Object.keys(forecast).length > 0 ? (
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-gray-100 text-gray-600 text-sm leading-normal">
+                          <th className="py-3 px-6 text-left">Meal</th>
                           {getNext7Days().map((day, index) => (
-                            <th
-                              key={index}
-                              className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                            >
+                            <th key={index} className="py-3 px-6 text-center">
                               {day}
                             </th>
                           ))}
                         </tr>
                       </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {renderForecastTable()}
+                      <tbody className="text-gray-600 text-sm">
+                        {Object.entries(forecast).map(([meal, values], index) => (
+                          <tr key={index} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                            <td className="py-3 px-6 text-left font-medium flex items-center">
+                              {getMealIcon(meal.toLowerCase())} {meal}
+                            </td>
+                            {values.slice(0, 7).map((value, idx) => (
+                              <td key={idx} className="py-3 px-6 text-center">
+                                <span
+                                  className={`py-1 px-3 rounded-full text-xs ${
+                                    meal === "Breakfast"
+                                      ? "bg-blue-100 text-blue-800"
+                                      : meal === "Lunch"
+                                        ? "bg-green-100 text-green-800"
+                                        : meal === "Snack"
+                                          ? "bg-yellow-100 text-yellow-800"
+                                          : "bg-purple-100 text-purple-800"
+                                  }`}
+                                >
+                                  {Math.round(value) > 0 ? Math.round(value) : 0}
+                                </span>
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
-                  </div>
-                ) : (
-                  <p className="text-center text-gray-500 py-4">
-                    No forecast data available
-                  </p>
-                )}
+                  ) : (
+                    <div className="py-4 text-center text-gray-500">No forecast data available</div>
+                  )}
+                </React.Suspense>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default HomePage;
+// Helper function to get next 7 days
+const getNext7Days = () => {
+  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+  const todayIndex = new Date().getDay()
+
+  return [...daysOfWeek.slice(todayIndex), ...daysOfWeek.slice(0, todayIndex)].slice(0, 7)
+}
+
+export default HomePage
+
+
 
 
 // "use client"

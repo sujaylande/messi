@@ -1059,7 +1059,7 @@ module.exports.addNotice = async (req, res) => {
           "notice_queue",
           Buffer.from(JSON.stringify({ notice, block_no, secret }))
         );
-        // console.log("Notice sent to queue");
+        console.log("Notice sent to queue");
       }
 
       res.status(201).json({ message: "Notice added successfully" });
