@@ -45,7 +45,6 @@ router.post('/add-menu', authManager, upload.single('image'), managerController.
 
 router.get('/display-menu', authManager, managerController.displayMenu)
 
-// router.post('/feedback-form', authManager, managerController.feedbackForm)
 
 router.get('/negative-feedback', authManager, managerController.displayNegativeFeedbacks)
 

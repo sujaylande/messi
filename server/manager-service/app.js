@@ -24,14 +24,22 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-db.connect((err) => {
-  if (err) {
-    console.error("Database connection failed:", err);
-  } else {
-    console.log("Connected to MySQL");
-  }
-});
+// db.connect((err) => {
+//   if (err) {
+//     console.error("Database connection failed:", err);
+//   } else {
+//     console.log("Connected to MySQL");
+//   }
+// });
 
+db.query("SELECT 1")
+  .then(([rows]) => {
+    console.log("✅ DB pool is working:", rows);
+  })
+  .catch((err) => {
+    console.error("❌ DB query failed:", err);
+  });
+  
 connectRabbitMQ();
 
 // app.use('/api/manager', managerRoutes);

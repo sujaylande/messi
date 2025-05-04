@@ -10,20 +10,26 @@ require('dotenv').config();
 // });
 
 
+// db.js
+
 const caPath = process.env.CA;
 if (!caPath) {
   console.error("❌ Missing CA file path in environment variables (CA=...)");
   process.exit(1);
 }
-module.exports = mysql.createConnection({
+
+const pool = mysql.createPool({
+  connectionLimit: 10, // adjust as needed
   host: process.env.HOST,
   user: process.env.USER,
   password: process.env.PASSWORD,
   database: process.env.DATABASE,
-  ssl:{
-    ca: fs.readFileSync(caPath)
-  }
+  ssl: {
+    ca: fs.readFileSync(caPath),
+  },
 });
+
+module.exports = pool.promise(); // Optional: promise wrapper
 
 
 

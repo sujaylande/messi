@@ -128,6 +128,7 @@ def forecast_attendance(block_no: int, secret: str = Header(None)):
 
     try:
         conn = get_db_connection()
+        # print("conn", conn)
         cursor = conn.cursor(dictionary=True)
         query = """
             SELECT date, meal_slot, COUNT(*) as count 

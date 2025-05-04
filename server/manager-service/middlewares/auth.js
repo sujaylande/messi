@@ -24,6 +24,7 @@ module.exports.authManager = async (req, res, next) => {
     }
 
     req.manager = decoded;
+    console.log("auth done");
     next();
   } catch (err) {
     console.error('AuthManager Error:', err.message);

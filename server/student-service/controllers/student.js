@@ -8,74 +8,6 @@ module.exports.getStudentProfile = async (req, res, next) => {
   res.status(200).json({ student: req.student });
 };
 
-// module.exports.studentLogout = (req, res) => {
-//   res.clearCookie("student-token", {
-//     httpOnly: true,
-//     secure: process.env.NODE_ENV === "production",
-//     sameSite: "Strict",
-//   });
-//   res.status(200).json({ message: "Logout successful" });
-// }
-
-// module.exports.studentLogin = (req, res) => {
-//   const { email, password } = req.body;
-
-//   if (!email || !password) {
-//     return res.status(400).json({ message: "Email and password are required" });
-//   }
-
-//   const query = `SELECT * FROM students WHERE email = ? LIMIT 1`;
-
-//   db.query(query, [email], async (err, results) => {
-//     if (err) {
-//       console.error(err);
-//       return res.status(500).json({ message: 'Internal server error' });
-//     }
-
-//     if (results.length === 0) {
-//       return res.status(401).json({ message: 'Invalid email or password' });
-//     }
-
-//     const student = results[0];
-
-//     try {
-//       const isMatch = await bcrypt.compare(password, student.password);
-
-//       if (!isMatch) {
-//         return res.status(401).json({ message: 'Invalid email or password' });
-//       }
-
-//       const token = jwt.sign(
-//         {
-//           email: student.email,
-//           block_no: student.block_no,
-//           name: student.name,
-//           role: student.role,
-//           reg_no: student.reg_no,
-//         },
-//         process.env.JWT_SECRET,
-//         { expiresIn: '2h' }
-//       );
-
-//       // avoid naming conflict
-//       const { password: dbPassword, ...studentWithoutPassword } = student;
-
-//       res.cookie('student-token', token, {
-//         httpOnly: true,
-//         secure: process.env.NODE_ENV === 'production',
-//         sameSite: 'Strict',
-//         maxAge: 2 * 60 * 60 * 1000, // 2 hours
-//       });
-
-//       res.status(200).json({ student: studentWithoutPassword });
-
-//     } catch (compareError) {
-//       console.error(compareError);
-//       res.status(500).json({ message: 'Password check failed' });
-//     }
-//   });
-// };
-
 module.exports.studentLogout = (req, res) => {
   const refreshToken = req.cookies["student-refresh-token"];
 
@@ -107,8 +39,11 @@ module.exports.studentLogout = (req, res) => {
   res.status(200).json({ message: "Logout successful" });
 };
 
-module.exports.studentLogin = (req, res) => {
+module.exports.studentLogin = async (req, res) => {
+  try{
   const { email, password } = req.body;
+
+  console.log("login");
 
   if (!email || !password) {
     return res.status(400).json({ message: "Email and password are required" });
@@ -116,17 +51,17 @@ module.exports.studentLogin = (req, res) => {
 
   const query = `SELECT * FROM students WHERE email = ? LIMIT 1`;
 
-  db.query(query, [email], async (err, results) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ message: "Internal server error" });
-    }
+   const[results] = await db.query(query, [email])
+
+    console.log(results);
 
     if (results.length === 0) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
     const student = results[0];
+
+    console.log(student)
 
     try {
       const isMatch = await bcrypt.compare(password, student.password);
@@ -172,10 +107,15 @@ module.exports.studentLogin = (req, res) => {
       console.error(compareError);
       res.status(500).json({ message: "Password check failed" });
     }
-  });
+  } catch (err){
+    return res.status(500).json({ message: "Internal server error" });
+  }
 };
 
-module.exports.refreshToken = (req, res) => {
+module.exports.refreshToken = async (req, res) => {
+
+  try {
+
   const refreshToken = req.cookies["student-refresh-token"];
 
   console.log("iam herer");
@@ -186,18 +126,14 @@ module.exports.refreshToken = (req, res) => {
 
   // Check blacklist
   const query = `SELECT token FROM blacklisted_tokens WHERE token = ? LIMIT 1`;
-  db.query(query, [refreshToken], (err, results) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ message: "Internal server error" });
-    }
+  const [results] = await db.query(query, [refreshToken])
+
     if (results.length > 0) {
       return res
         .status(401)
         .json({ message: "Unauthorized: Refresh token blacklisted" });
     }
 
-    try {
       const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
       const payload = {
@@ -237,10 +173,9 @@ module.exports.refreshToken = (req, res) => {
       console.error("Refresh error:", err.message);
       return res.status(403).json({ message: "Invalid refresh token" });
     }
-  });
 };
 
-module.exports.studentStatistics = (req, res) => {
+module.exports.studentStatistics = async (req, res) => {
   try {
     const { reg_no, block_no } = req.params;
 
@@ -249,10 +184,7 @@ module.exports.studentStatistics = (req, res) => {
     }
 
     const checkQuery = `SELECT * FROM students WHERE reg_no = ? AND block_no = ?;`;
-    db.query(checkQuery, [reg_no, block_no], (err, studentResult) => {
-      if (err) {
-        return res.status(500).json({ error: "Internal Server Error" });
-      }
+    const [studentResult] = await db.query(checkQuery, [reg_no, block_no])
 
       if (studentResult.length === 0) {
         return res.status(404).json({ error: "Student not found" });
@@ -274,11 +206,7 @@ module.exports.studentStatistics = (req, res) => {
         ORDER BY STR_TO_DATE(formatted_date, '%d-%m-%Y') DESC;
       `;
 
-      db.query(query, [reg_no], (err, attendanceResult) => {
-        if (err) {
-          console.error("Error fetching student mess attendance:", err);
-          return res.status(500).json({ error: "Internal Server Error" });
-        }
+      const [attendanceResult] = await db.query(query, [reg_no])
 
         const totalAmount = attendanceResult.reduce(
           (sum, row) => sum + Number(row.total_cost || 0),
@@ -293,119 +221,43 @@ module.exports.studentStatistics = (req, res) => {
           attendance: attendanceResult,
           totalAmount,
         });
-      });
-    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
-module.exports.displayNotice = (req, res) => {
+module.exports.displayNotice = async (req, res) => {
+  try{
   const block_no = req.student.block_no;
-  db.query(
+  const [results] = await db.query(
     "SELECT notice FROM notice_board WHERE block_no = ?",
-    [block_no],
-    (err, results) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json(results);
-    }
-  );
+    [block_no])
+    res.json(results);
+  }catch (err){
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
 
-module.exports.displayMenu = (req, res) => {
+module.exports.displayMenu = async (req, res) => {
+  try{
   const today = format(new Date(), "yyyy-MM-dd");
   const block_no = req.student.block_no;
 
-  db.query(
+  const [results] = await db.query(
     "SELECT id, items, img_url, meal_slot FROM menu WHERE DATE(timestamp) = ? AND block_no = ?",
-    [today, block_no],
-    (err, results) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json(results);
-    }
-  );
+    [today, block_no])
+    res.json(results);
+  }catch (err){
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
 
-// module.exports.feedbackForm = async (req, res) => {
-//   try {
-//     const { reg_no, block_no, meal_type, taste, hygiene, quantity, want_change, comments } = req.body;
 
-//     console.log(req.body)
-
-//     if (!reg_no || !block_no || !meal_type || !taste || !hygiene || !quantity) {
-//       return res.status(400).json({
-//         error: "reg_no, meal_type, taste, hygiene, quantity, and want_change are required",
-//       });
-//     }
-
-//     const query = `
-//       INSERT INTO feedback (reg_no, block_no, meal_type, taste_rating, hygiene_rating, quantity_rating, want_change, comments, feedback_date)
-//       VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURDATE())
-//     `;
-
-//     await db.execute(query, [
-//       reg_no,
-//       block_no,
-//       meal_type,
-//       taste,
-//       hygiene,
-//       quantity,
-//       want_change,
-//       comments,
-//     ]);
-
-//     // Publish feedback to Manager Service via RabbitMQ
-//     const channel = getChannel();
-//     if (channel) {
-//       const feedbackData = {
-//         reg_no,
-//         block_no,
-//         meal_type,
-//         taste,
-//         hygiene,
-//         quantity,
-//         want_change,
-//         comments,
-//         secret: process.env.SHARED_SECRET // 🛡️ Add the shared secret here
-//       };
-//       channel.sendToQueue("feedback_queue", Buffer.from(JSON.stringify(feedbackData)));
-//       console.log("📤 Feedback sent to Manager Service!");
-//     } else {
-//       console.error("❌ Failed to publish feedback: RabbitMQ channel unavailable.");
-//     }
-
-//     if (channel) {
-//       const feedbackData = {
-//         reg_no,
-//         block_no,
-//         meal_type,
-//         taste,
-//         hygiene,
-//         quantity,
-//         want_change,
-//         comments,
-//         secret: process.env.SHARED_SECRET // 🛡️ Add the shared secret here
-//       };
-
-//       channel.sendToQueue(
-//         "feedback_queue_for_scipt_service",
-//         Buffer.from(JSON.stringify(feedbackData))
-//       );
-
-//       console.log("📤 Feedback sent to script Service!");
-//     } else {
-//       console.error("❌ Failed to publish feedback: RabbitMQ channel unavailable.");
-//     }
-
-//     res.status(201).json({ message: "Feedback submitted successfully!" });
-//   } catch (error) {
-//     console.error("Error submitting feedback:", error);
-//     res.status(500).json({ error: "Server error" });
-//   }
-// };
-
-module.exports.feedbackForm = (req, res) => {
+module.exports.feedbackForm = async (req, res) => {
+  try{
   const {
     reg_no,
     block_no,
@@ -429,11 +281,7 @@ module.exports.feedbackForm = (req, res) => {
 
   // 🛑 Check for duplicate feedback
   const checkQuery = `SELECT id FROM feedback WHERE reg_no = ? AND meal_type = ? AND DATE(feedback_date) = ? LIMIT 1`;
-  db.query(checkQuery, [reg_no, meal_type, today], (err, result) => {
-    if (err) {
-      console.error("Error checking for duplicate feedback:", err);
-      return res.status(500).json({ error: "Internal server error" });
-    }
+  const [result] = await db.query(checkQuery, [reg_no, meal_type, today])
 
     if (result.length > 0) {
       return res.status(409).json({ error: "Feedback already submitted for this meal today" });
@@ -453,11 +301,7 @@ module.exports.feedbackForm = (req, res) => {
       quantity,
       want_change,
       comments,
-    ], (err, result) => {
-      if (err) {
-        console.error("Error inserting feedback:", err);
-        return res.status(500).json({ error: "Internal server error" });
-      }
+    ])
 
       // 📨 Send feedback data to RabbitMQ queues
       const feedbackData = {
@@ -483,8 +327,10 @@ module.exports.feedbackForm = (req, res) => {
       }
 
       res.status(201).json({ message: "Feedback submitted successfully!" });
-    });
-  });
+    }catch (err){
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
+    }
 };
 
 

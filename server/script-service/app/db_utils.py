@@ -4,13 +4,29 @@ import numpy as np
 from dotenv import load_dotenv
 load_dotenv()
 
+# def get_db_connection(): 
+#     return mysql.connector.connect(
+#         host=os.getenv("DB_HOST"),
+#         user=os.getenv("DB_USER"),
+#         password=os.getenv("DB_PASSWORD"),
+#         database=os.getenv("DB_NAME"),
+#         ssl_ca=os.getenv("DB_SSL_CA")  # correct usage
+#     )
+
+# Create pool only once at startup
+pool = mysql.connector.pooling.MySQLConnectionPool(
+    pool_name="mypool",
+    pool_size=5,
+    pool_reset_session=True,
+    host=os.getenv("DB_HOST"),
+    user=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD"),
+    database=os.getenv("DB_NAME"),
+    ssl_ca=os.getenv("DB_SSL_CA")
+)
+
 def get_db_connection():
-    return mysql.connector.connect(
-        host=os.getenv("DB_HOST"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME")
-    )
+    return pool.get_connection()
 
 
 def insert_student(conn, student_data):
@@ -48,6 +64,7 @@ def get_all_embeddings(conn, block_no):
 
 
 def insert_attendance(conn, reg_no, block_no, meal_slot, meal_cost, timestamp, date):
+    print("insert_attendance", meal_slot)
     cursor = conn.cursor()
     cursor.execute("""
         INSERT INTO attendance (reg_no, block_no, meal_slot, meal_cost, timestamp, date)
