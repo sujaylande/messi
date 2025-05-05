@@ -88,7 +88,7 @@ async function connectRabbitMQ() {
     //   }
     // });
 
-channel.consume("attendance_queue_for_student", async (msg) => {
+    channel.consume("attendance_queue_for_student", async (msg) => {
   if (msg !== null) {
     const attendanceData = JSON.parse(msg.content.toString());
 
@@ -119,11 +119,10 @@ channel.consume("attendance_queue_for_student", async (msg) => {
 
     channel.ack(msg);
   }
-});
-
+    });
 
      // Listening for attendance Updates
-     channel.consume("register_student_queue_for_student", async (msg) => {
+    channel.consume("register_student_queue_for_student", async (msg) => {
            if (msg !== null) {
              const registrationData = JSON.parse(msg.content.toString());
      
@@ -145,7 +144,7 @@ channel.consume("attendance_queue_for_student", async (msg) => {
      
              channel.ack(msg);
            }
-         });
+    });
 
     channel.consume("delete_student_queue_for_student", async (msg) => {
       if (msg !== null) {

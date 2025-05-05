@@ -49,22 +49,6 @@ def send_registration_event_toStudent(payload):
         properties=pika.BasicProperties(delivery_mode=2)
     )
 
-# def send_attendance_event_toStudent(payload):
-#     channel.basic_publish(
-#         exchange='',
-#         routing_key='attendance_queue_for_student',
-#         body=json.dumps(payload),
-#         properties=pika.BasicProperties(delivery_mode=2)
-#     )
-
-# def send_attendance_event_toManager(payload):
-#     channel.basic_publish(
-#         exchange='',
-#         routing_key='attendance_queue_for_manager',
-#         body=json.dumps(payload),
-#         properties=pika.BasicProperties(delivery_mode=2)
-#     )
-
 SHARED_SECRET = os.getenv("SHARED_SECRET")
 
 def send_attendance_event_toStudent(payload):
@@ -77,6 +61,7 @@ def send_attendance_event_toStudent(payload):
     )
 
 def send_attendance_event_toManager(payload):
+    print("sending att to manager")
     payload["secret"] = SHARED_SECRET
     channel.basic_publish(
         exchange='',

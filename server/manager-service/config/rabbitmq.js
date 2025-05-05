@@ -127,28 +127,8 @@ async function connectRabbitMQ() {
         channel.ack(msg);
       }
     });
-
-    // Listening for attendance Updates
-        // channel.consume("attendance_queue_for_manager", async (msg) => {
-        //   if (msg !== null) {
-        //     const attendanceData = JSON.parse(msg.content.toString());
     
-        //     console.log(attendanceData)
-    
-        //     db.query(
-        //       "INSERT INTO attendance (reg_no, date, meal_slot, meal_cost, block_no, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
-        //       [attendanceData.reg_no, attendanceData.date, attendanceData.meal_slot, attendanceData.meal_cost, attendanceData.block_no, attendanceData.timestamp],
-        //       (err) => {
-        //         if (err) console.error("Error inserting attendance:", err.message);
-        //         else console.log("✅ attendance saved in Student Database.");
-        //       }
-        //     );
-    
-        //     channel.ack(msg);
-        //   }
-        // });
-    
-        channel.consume("attendance_queue_for_manager", async (msg) => {
+    channel.consume("attendance_queue_for_manager", async (msg) => {
           if (msg !== null) {
             const attendanceData = JSON.parse(msg.content.toString());
         
@@ -171,13 +151,12 @@ async function connectRabbitMQ() {
               ],
               (err) => {
                 if (err) console.error("Error inserting attendance:", err.message);
-                else console.log("✅ attendance saved in Manager DB.");
               }
             );
-        
+            console.log("✅ attendance saved in Manager DB.");
             channel.ack(msg);
           }
-        });
+    });
         
 
     return channel;

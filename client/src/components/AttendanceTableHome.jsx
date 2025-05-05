@@ -1,8 +1,7 @@
 "use client"
-import { ChevronUp, ChevronDown, Coffee, Utensils, Cookie, Moon, TrendingUp, TrendingDown, Minus } from "lucide-react"
+import { Users, Coffee, Utensils, Cookie, Moon } from "lucide-react"
 
-const AttendanceTable = ({ data, isLoading, sortConfig, requestSort, calculateTrend }) => {
-  console.log("a table", data)
+const AttendanceTableHome = ({ attendanceToday, isLoading }) => {
   // Get meal icon
   const getMealIcon = (meal) => {
     switch (meal) {
@@ -19,114 +18,80 @@ const AttendanceTable = ({ data, isLoading, sortConfig, requestSort, calculateTr
     }
   }
 
-  // Render trend indicator
-  const renderTrendIndicator = (trend) => {
-    if (trend === "up") return <TrendingUp className="inline h-3 w-3 ml-1 text-green-600" />
-    if (trend === "down") return <TrendingDown className="inline h-3 w-3 ml-1 text-red-600" />
-    return <Minus className="inline h-3 w-3 ml-1 text-gray-400" />
-  }
-
-  // Sort function for tables
-  const getSortedData = (data) => {
-    if (!data || data.length === 0) return []
-
-    const sortableData = [...data]
-    sortableData.sort((a, b) => {
-      if (a[sortConfig.key] < b[sortConfig.key]) {
-        return sortConfig.direction === "ascending" ? -1 : 1
-      }
-      if (a[sortConfig.key] > b[sortConfig.key]) {
-        return sortConfig.direction === "ascending" ? 1 : -1
-      }
-      return 0
-    })
-    return sortableData
-  }
+  // Debug log to check what data is coming in
+  console.log("AttendanceTable received data:", attendanceToday)
 
   return (
-    <table className="w-full">
-      <thead>
-        <tr className="bg-gray-100 text-gray-600 text-sm leading-normal">
-          <th className="py-3 px-6 text-left cursor-pointer" onClick={() => requestSort("formatted_date")}>
-            <div className="flex items-center">
-              Date
-              {sortConfig.key === "formatted_date" &&
-                (sortConfig.direction === "ascending" ? <ChevronUp size={16} /> : <ChevronDown size={16} />)}
-            </div>
-          </th>
-          <th className="py-3 px-6 text-center cursor-pointer" onClick={() => requestSort("breakfast_count")}>
-            <div className="flex items-center justify-center">
-              {getMealIcon("breakfast")} Breakfast
-              {sortConfig.key === "breakfast_count" &&
-                (sortConfig.direction === "ascending" ? <ChevronUp size={16} /> : <ChevronDown size={16} />)}
-            </div>
-          </th>
-          <th className="py-3 px-6 text-center cursor-pointer" onClick={() => requestSort("lunch_count")}>
-            <div className="flex items-center justify-center">
-              {getMealIcon("lunch")} Lunch
-              {sortConfig.key === "lunch_count" &&
-                (sortConfig.direction === "ascending" ? <ChevronUp size={16} /> : <ChevronDown size={16} />)}
-            </div>
-          </th>
-          <th className="py-3 px-6 text-center cursor-pointer" onClick={() => requestSort("snack_count")}>
-            <div className="flex items-center justify-center">
-              {getMealIcon("snack")} Snack
-              {sortConfig.key === "snack_count" &&
-                (sortConfig.direction === "ascending" ? <ChevronUp size={16} /> : <ChevronDown size={16} />)}
-            </div>
-          </th>
-          <th className="py-3 px-6 text-center cursor-pointer" onClick={() => requestSort("dinner_count")}>
-            <div className="flex items-center justify-center">
-              {getMealIcon("dinner")} Dinner
-              {sortConfig.key === "dinner_count" &&
-                (sortConfig.direction === "ascending" ? <ChevronUp size={16} /> : <ChevronDown size={16} />)}
-            </div>
-          </th>
-        </tr>
-      </thead>
-      <tbody className="text-gray-600 text-sm">
-        {isLoading ? (
-          <tr>
-            <td colSpan={5} className="py-4 text-center">
-              Loading...
-            </td>
-          </tr>
-        ) : data.length > 0 ? (
-          getSortedData(data).map((row, index) => (
-            <tr key={index} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-              <td className="py-3 px-6 text-left whitespace-nowrap font-medium">{row.formatted_date}</td>
-              <td className="py-3 px-6 text-center">
-                <span className="bg-blue-100 text-blue-800 py-1 px-3 rounded-full text-xs">
-                  {row.breakfast_count} {renderTrendIndicator(calculateTrend(index, "breakfast"))}
-                </span>
-              </td>
-              <td className="py-3 px-6 text-center">
-                <span className="bg-green-100 text-green-800 py-1 px-3 rounded-full text-xs">
-                  {row.lunch_count} {renderTrendIndicator(calculateTrend(index, "lunch"))}
-                </span>
-              </td>
-              <td className="py-3 px-6 text-center">
-                <span className="bg-yellow-100 text-yellow-800 py-1 px-3 rounded-full text-xs">
-                  {row.snack_count} {renderTrendIndicator(calculateTrend(index, "snack"))}
-                </span>
-              </td>
-              <td className="py-3 px-6 text-center">
-                <span className="bg-purple-100 text-purple-800 py-1 px-3 rounded-full text-xs">
-                  {row.dinner_count} {renderTrendIndicator(calculateTrend(index, "dinner"))}
-                </span>
-              </td>
+    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600">
+        <h2 className="text-xl font-bold text-white flex items-center">
+          <Users className="mr-2 h-5 w-5" />
+          Today's Attendance
+        </h2>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-gray-100 text-gray-600 text-sm leading-normal">
+              <th className="py-3 px-6 text-center cursor-pointer" >
+                <div className="flex items-center justify-center">{getMealIcon("breakfast")} Breakfast</div>
+              </th>
+              <th className="py-3 px-6 text-center cursor-pointer" >
+                <div className="flex items-center justify-center">{getMealIcon("lunch")} Lunch</div>
+              </th>
+              <th className="py-3 px-6 text-center cursor-pointer" >
+                <div className="flex items-center justify-center">{getMealIcon("snack")} Snack</div>
+              </th>
+              <th className="py-3 px-6 text-center cursor-pointer" >
+                <div className="flex items-center justify-center">{getMealIcon("dinner")} Dinner</div>
+              </th>
             </tr>
-          ))
-        ) : (
-          <tr>
-            <td colSpan={5} className="py-4 text-center">
-              No attendance data available
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
+          </thead>
+          <tbody className="text-gray-600 text-sm">
+            {isLoading ? (
+              <tr>
+                <td colSpan={4} className="py-4 text-center">
+                  Loading...
+                </td>
+              </tr>
+            ) : Array.isArray(attendanceToday) && attendanceToday.length > 0 ? (
+              attendanceToday.map((row, index) => (
+                <tr key={index} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                  <td className="py-3 px-6 text-center">
+                    <span className="bg-blue-100 text-blue-800 py-1 px-3 rounded-full text-xs">
+                      {row.breakfast || 0}
+                    </span>
+                  </td>
+                  <td className="py-3 px-6 text-center">
+                    <span className="bg-green-100 text-green-800 py-1 px-3 rounded-full text-xs">
+                      {row.lunch || 0}
+                    </span>
+                  </td>
+                  <td className="py-3 px-6 text-center">
+                    <span className="bg-yellow-100 text-yellow-800 py-1 px-3 rounded-full text-xs">
+                      {row.snack || 0}
+                    </span>
+                  </td>
+                  <td className="py-3 px-6 text-center">
+                    <span className="bg-purple-100 text-purple-800 py-1 px-3 rounded-full text-xs">
+                      {row.dinner || 0}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4} className="py-3 px-6 text-center">
+                  No attendance data available
+                </td>
+              </tr>
+            )
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
   )
 }
 
-export default AttendanceTable
+export default AttendanceTableHome
