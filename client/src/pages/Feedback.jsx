@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, Label } from "recharts"
 import managerAxios from "../api/managerAxios";
+import NavStat from "../components/NavStat";
 axios.defaults.withCredentials = true;
 
 
@@ -103,7 +104,9 @@ export default function FeedbackInsights() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6 bg-white rounded-lg shadow-md">
+    <>      <NavStat/>
+
+    <div className="max-w-5xl mx-auto p-6 bg-white rounded-lg shadow-md mt-8">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">Today's Feedback Statistics</h2>
 
       {feedbackStats.length > 0 ? (
@@ -379,6 +382,7 @@ export default function FeedbackInsights() {
         )}
       </div>
     </div>
+    </>
   )
 }
 

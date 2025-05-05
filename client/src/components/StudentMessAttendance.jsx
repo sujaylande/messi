@@ -223,6 +223,7 @@
 import { useState } from "react"
 import axios from "axios"
 import managerAxios from "../api/managerAxios"
+import NavStat from "./NavStat"
 
 const StudentMessAttendance = () => {
   const [regNo, setRegNo] = useState("")
@@ -494,12 +495,11 @@ const StudentMessAttendance = () => {
   }
 
   return (
+    <>
+    <NavStat/>
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Student Mess Management</h1>
-          <p className="text-gray-600 mt-2">Track attendance, update status, and manage student records</p>
-        </div>
+ 
 
         {error && (
           <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md shadow-sm">
@@ -795,6 +795,7 @@ const StudentMessAttendance = () => {
         )}
       </div>
     </div>
+    </>
   )
 }
 

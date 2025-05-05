@@ -59,6 +59,7 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 import managerAxios from '../api/managerAxios'
+import NavStat from "./NavStat"
 
 axios.defaults.withCredentials = true
 
@@ -114,10 +115,12 @@ export default function NoticeBoard() {
   }
 
   return (
-    <div className="max-w-xl mx-auto p-6 bg-white shadow-lg rounded-xl border border-gray-100">
+    <>      <NavStat />
+
+    <div className="max-w-xl mx-auto p-6 bg-white shadow-lg rounded-xl border border-gray-100 py-8 mt-8">
       <h2 className="text-2xl font-bold mb-6 text-gray-800 flex items-center">
         <svg
-          className="w-6 h-6 mr-2 text-amber-500"
+          className="w-6 h-6 mr-2 text-green-500"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -153,15 +156,15 @@ export default function NoticeBoard() {
             placeholder="Enter important announcement..."
             value={notice}
             onChange={(e) => setNotice(e.target.value)}
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-colors"
+            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors"
           />
           <button
             onClick={addNotice}
             disabled={isSubmitting || !notice.trim()}
             className={`px-4 py-2 rounded-lg font-medium text-white transition-all duration-200 ${
               isSubmitting || !notice.trim()
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-amber-500 hover:bg-amber-600 active:bg-amber-700 shadow-md hover:shadow-lg"
+                ? "bg-green-400 cursor-not-allowed"
+                : "bg-green-500 hover:bg-green-600 active:bg-green-700 shadow-md hover:shadow-lg"
             }`}
           >
             {isSubmitting ? (
@@ -229,7 +232,7 @@ export default function NoticeBoard() {
             >
               <div className="flex items-start">
                 <svg
-                  className="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0"
+                  className="w-5 h-5 text-green-500 mt-0.5 mr-3 flex-shrink-0"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -272,5 +275,6 @@ export default function NoticeBoard() {
         </div>
       )}
     </div>
+    </>
   )
 }
