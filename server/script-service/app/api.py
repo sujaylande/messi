@@ -198,6 +198,7 @@ def fetch_feedback(block_no: str):
 
         cursor.close()
         conn.close()
+        print("fe", rows)
         return rows
     except Exception as e:
         return str(e)
@@ -216,6 +217,7 @@ def analyze_feedback(feedback_data):
             })
     
     negative_comments.sort(key=lambda x: x["score"])
+    print("ne", negative_comments)
     return negative_comments
 
 # @app.get("/feedback/negative")

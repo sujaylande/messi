@@ -36,7 +36,7 @@ def get_current_meal():
     now = datetime.now().strftime("%H:%M")
     slots = {
         "Breakfast": ("09:08", "09:59", 50),
-        "Lunch": ("10:00", "10:00", 100),
+        "Lunch": ("10:00", "11:00", 100),
         "Snack": ("11:01", "18:59", 50),
         "Dinner": ("19:01", "20:00", 100)
     }

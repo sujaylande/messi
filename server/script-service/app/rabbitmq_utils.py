@@ -132,9 +132,9 @@ def start_feedback_consumer():
             # 👇 Create a NEW connection and channel for this thread
             thread_connection = pika.BlockingConnection(params)
             thread_channel = thread_connection.channel()
-            thread_channel.queue_declare(queue='feedback_queue_for_scipt_service', durable=True)
+            thread_channel.queue_declare(queue='feedback_queue_for_script_service', durable=True)
             thread_channel.basic_consume(
-                queue='feedback_queue_for_scipt_service',
+                queue='feedback_queue_for_script_service',
                 on_message_callback=feedback_callback
             )
             print("🚀 Feedback consumer started")

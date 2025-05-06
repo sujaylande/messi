@@ -1005,12 +1005,12 @@ module.exports.displayMenu = async (req, res) => {
 
 module.exports.displayNegativeFeedbacks = async (req, res) => {
   try {
-    const cachedData = cache.get("negative_comments");
+    // const cachedData = cache.get("negative_comments");
     const block_no = req.manager.block_no;
 
-    if (cachedData) {
-      return res.json(cachedData);
-    }
+    // if (cachedData) {
+    //   return res.json(cachedData);
+    // }
 
     const fastapiURL = `http://localhost:8000/feedback/negative?block_no=${block_no}`;
     const response = await axios.get(fastapiURL, {
@@ -1020,6 +1020,7 @@ module.exports.displayNegativeFeedbacks = async (req, res) => {
     });
 
     cache.set("negative_comments", response.data);
+    console.log(response.data)
     res.json(response.data);
   } catch (err) {
     console.error("Error calling FastAPI:", err.message);
